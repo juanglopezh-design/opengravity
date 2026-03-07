@@ -1,0 +1,28 @@
+{
+  "name": "opengravity",
+  "version": "1.0.0",
+  "description": "Local AI Agent with Telegram interface",
+  "main": "dist/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^13.7.0",
+    "grammy": "^1.32.0",
+    "openai": "^4.76.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

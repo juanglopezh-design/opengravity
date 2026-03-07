@@ -1,0 +1,18 @@
+services:
+  - type: worker
+    name: opengravity
+    env: node
+    region: frankfurt
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_ALLOWED_USER_IDS
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GOOGLE_APPLICATION_CREDENTIALS
+        value: ./service-account.json

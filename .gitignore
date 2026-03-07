@@ -1,0 +1,12 @@
+node_modules
+.env
+dist
+memory.db
+memory.db-journal
+*.log
+service-account.json
+firebase_login.txt
+firebase_login_utf8.txt
+deploy_error.txt
+build_errors.txt
+build_errors_utf8.txt
