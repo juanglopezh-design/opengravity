@@ -14,5 +14,9 @@ services:
         sync: false
       - key: GROQ_API_KEY
         sync: false
-      - key: GOOGLE_APPLICATION_CREDENTIALS
-        value: ./service-account.json
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
