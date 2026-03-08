@@ -1,3 +1,5 @@
+// Trigger redeploy - updated 2026-03-08
+
 import { chatCompletion, LLMMessage } from '../llm/client.js';
 import { dbGetMessages, dbAddMessage } from '../memory/database.js';
 import { toolsRegistry, getAvailableTools } from './tools/index.js';
