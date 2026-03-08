@@ -64,3 +64,48 @@ export const dbGetMessages = async (userId: number, limit: number = 50): Promise
   });
   return messages;
 };
+
+export interface RemoteCommand {
+  id?: string;
+  command: string;
+  args?: any;
+  status: 'pending' | 'completed' | 'failed';
+  result?: string;
+  created_at: Date;
+  updated_at?: Date;
+}
+
+export const dbAddRemoteCommand = async (command: string, args: any = {}): Promise<string> => {
+  if (!db) initializeFirestore();
+  const commandsRef = db.collection('remote_commands');
+  const docRef = await commandsRef.add({
+    command,
+    args,
+    status: 'pending',
+    created_at: new Date()
+  });
+  return docRef.id;
+};
+
+export const dbGetPendingCommands = async (): Promise<RemoteCommand[]> => {
+  if (!db) initializeFirestore();
+  const snapshot = await db.collection('remote_commands')
+    .where('status', '==', 'pending')
+    .orderBy('created_at', 'asc')
+    .get();
+
+  const commands: RemoteCommand[] = [];
+  snapshot.forEach(doc => {
+    commands.push({ id: doc.id, ...doc.data() } as RemoteCommand);
+  });
+  return commands;
+};
+
+export const dbUpdateCommandResult = async (commandId: string, status: 'completed' | 'failed', result: string) => {
+  if (!db) initializeFirestore();
+  await db.collection('remote_commands').doc(commandId).update({
+    status,
+    result,
+    updated_at: new Date()
+  });
+};
