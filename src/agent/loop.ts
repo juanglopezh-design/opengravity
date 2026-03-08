@@ -1,4 +1,5 @@
-// Trigger redeploy - updated 2026-03-08
+// redeploy trigger - 2026-03-08T14:10:00Z
+
 
 import { chatCompletion, LLMMessage } from '../llm/client.js';
 import { dbGetMessages, dbAddMessage } from '../memory/database.js';

@@ -8,8 +8,9 @@ import fs from 'fs';
 const execAsync = promisify(exec);
 
 // Local Bridge Setup
-if (!config.FIREBASE_SERVICE_ACCOUNT && !config.GOOGLE_APPLICATION_CREDENTIALS) {
-  console.error('❌ Error: Credenciales de Firebase no encontradas. Asegúrate de tener el archivo service-account.json localmente.');
+// If no Firebase credentials are provided via env vars AND no local service-account.json exists, abort.
+if (!config.FIREBASE_SERVICE_ACCOUNT && !config.GOOGLE_APPLICATION_CREDENTIALS && !fs.existsSync('./service-account.json')) {
+  console.error('❌ Error: Credenciales de Firebase no encontradas. Proporcione FIREBASE_SERVICE_ACCOUNT env var o coloque service-account.json en el directorio del proyecto.');
   process.exit(1);
 }
 
