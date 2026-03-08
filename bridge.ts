@@ -54,8 +54,9 @@ async function pollCommands() {
       await dbUpdateCommandResult(cmd.id!, status, result);
       console.log(`✅ Resultado enviado para ID ${cmd.id}`);
     }
-  } catch (error) {
-    console.error('❌ Error en el loop de polling:', error);
+  } catch (error: any) {
+    console.error('❌ Error en el loop de polling:', error.message || error);
+    if (error.stack) console.error(error.stack);
   }
 
   setTimeout(pollCommands, 3000); // Check every 3 seconds
