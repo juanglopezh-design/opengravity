@@ -18,5 +18,7 @@ services:
         sync: false
       - key: OPENROUTER_MODEL
         sync: false
+      - key: FORCE_REDEPLOY
+        value: "2026-03-08T14:30:00Z"
       - key: FIREBASE_SERVICE_ACCOUNT
         sync: false
