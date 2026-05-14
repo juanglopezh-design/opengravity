@@ -1,0 +1,3 @@
+module.exports=[25325,a=>{"use strict";var b=a.i(82602);a.s(["default",0,function({children:a}){return(0,b.jsx)("html",{lang:"es",children:(0,b.jsx)("body",{children:a})})},"metadata",0,{title:"ContentFlow AI — Genera contenido viral en 10 segundos",description:"La plataforma de IA más potente para crear contenido de redes sociales, blogs y emails. Genera contenido profesional al instante con inteligencia artificial.",keywords:"generador de contenido IA, inteligencia artificial, redes sociales, marketing de contenido, SaaS",openGraph:{title:"ContentFlow AI",description:"Genera contenido viral en 10 segundos con IA",type:"website"}}])},41632,a=>{a.n(a.i(25325))}];
+
+//# sourceMappingURL=contentflow-ai_src_app_layout_tsx_0.ca~cv._.js.map

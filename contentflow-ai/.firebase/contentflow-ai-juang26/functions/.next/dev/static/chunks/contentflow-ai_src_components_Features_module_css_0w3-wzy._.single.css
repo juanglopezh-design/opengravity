@@ -1,0 +1,87 @@
+/* [project]/contentflow-ai/src/components/Features.module.css [app-client] (css) */
+.Features-module__Z3RzZG__section {
+  padding: 100px 0;
+  position: relative;
+}
+
+.Features-module__Z3RzZG__header {
+  text-align: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 64px;
+  display: flex;
+}
+
+.Features-module__Z3RzZG__title {
+  letter-spacing: -1px;
+  max-width: 700px;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.Features-module__Z3RzZG__subtitle {
+  color: var(--text-secondary);
+  max-width: 580px;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.Features-module__Z3RzZG__grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  display: grid;
+}
+
+.Features-module__Z3RzZG__card {
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px 28px;
+  display: flex;
+}
+
+.Features-module__Z3RzZG__iconWrap {
+  background: #8b5cf61a;
+  border: 1px solid #8b5cf633;
+  border-radius: 14px;
+  justify-content: center;
+  align-items: center;
+  width: 52px;
+  height: 52px;
+  display: flex;
+}
+
+.Features-module__Z3RzZG__icon {
+  font-size: 24px;
+}
+
+.Features-module__Z3RzZG__cardTitle {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.Features-module__Z3RzZG__cardDesc {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+@media (max-width: 1024px) {
+  .Features-module__Z3RzZG__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .Features-module__Z3RzZG__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .Features-module__Z3RzZG__section {
+    padding: 70px 0;
+  }
+}
+
+/*# sourceMappingURL=contentflow-ai_src_components_Features_module_css_0w3-wzy._.single.css.map*/

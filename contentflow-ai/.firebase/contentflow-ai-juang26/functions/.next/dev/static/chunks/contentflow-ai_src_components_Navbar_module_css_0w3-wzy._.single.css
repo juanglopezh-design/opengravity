@@ -1,0 +1,109 @@
+/* [project]/contentflow-ai/src/components/Navbar.module.css [app-client] (css) */
+.Navbar-module__9gwNPW__nav {
+  z-index: 100;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  background: #080b14cc;
+  border-bottom: 1px solid #ffffff0f;
+  padding: 16px 0;
+  transition: all .3s;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.Navbar-module__9gwNPW__inner {
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+}
+
+.Navbar-module__9gwNPW__logo {
+  white-space: nowrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  text-decoration: none;
+  display: flex;
+}
+
+.Navbar-module__9gwNPW__logoIcon {
+  font-size: 22px;
+}
+
+.Navbar-module__9gwNPW__links {
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  display: flex;
+}
+
+.Navbar-module__9gwNPW__link {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color .2s;
+}
+
+.Navbar-module__9gwNPW__link:hover {
+  color: var(--text-primary);
+}
+
+.Navbar-module__9gwNPW__actions {
+  white-space: nowrap;
+  align-items: center;
+  gap: 12px;
+  display: flex;
+}
+
+.Navbar-module__9gwNPW__hamburger {
+  cursor: pointer;
+  background: none;
+  border: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 4px;
+  display: none;
+}
+
+.Navbar-module__9gwNPW__hamburger span {
+  background: var(--text-primary);
+  border-radius: 2px;
+  width: 22px;
+  height: 2px;
+  transition: all .3s;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .Navbar-module__9gwNPW__links {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 24px;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+  }
+
+  .Navbar-module__9gwNPW__links.Navbar-module__9gwNPW__open, .Navbar-module__9gwNPW__hamburger {
+    display: flex;
+  }
+
+  .Navbar-module__9gwNPW__actions a:first-child {
+    display: none;
+  }
+}
+
+/*# sourceMappingURL=contentflow-ai_src_components_Navbar_module_css_0w3-wzy._.single.css.map*/
