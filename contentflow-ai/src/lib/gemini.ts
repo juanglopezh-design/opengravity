@@ -7,7 +7,7 @@ export async function generateContent(prompt: string, type: string, tone: string
     throw new Error("API key no configurada");
   }
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
   const systemPrompt = `Eres un experto copywriter y creador de contenido de clase mundial.
 Tu objetivo es generar contenido de alta conversión y máximo engagement.
