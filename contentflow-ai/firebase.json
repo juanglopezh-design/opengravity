@@ -5,6 +5,14 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "auth": {
+    "authorizedDomains": [
+      "localhost",
+      "contentflow-ai-juang26.firebaseapp.com",
+      "contentflow-ai-juang26.web.app",
+      "contentflow-ai.onrender.com"
+    ]
+  },
   "hosting": {
     "site": "contentflow-ai-juang26",
     "source": ".",
