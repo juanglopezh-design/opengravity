@@ -1,1 +1,1 @@
-services: [{type: web, name: contentflow-ai, plan: free, rootDir: contentflow-ai, buildCommand: "npm run build", startCommand: "npm start"}]
+services: [{type: web, name: contentflow-ai, env: node, plan: free, rootDir: contentflow-ai, buildCommand: "npm run build", startCommand: "npm start", envVars: [{key: NEXT_PUBLIC_APP_URL, value: "https://contentflow-ai.onrender.com"}]}]
