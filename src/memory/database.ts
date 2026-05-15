@@ -95,11 +95,21 @@ export const dbGetPendingCommands = async (): Promise<RemoteCommand[]> => {
 
   const commands: RemoteCommand[] = [];
   snapshot.forEach(doc => {
-    commands.push({ id: doc.id, ...doc.data() } as RemoteCommand);
+    const data = doc.data();
+    commands.push({ 
+      id: doc.id, 
+      ...data,
+      created_at: data.created_at?.toDate ? data.created_at.toDate() : new Date(data.created_at),
+      updated_at: data.updated_at?.toDate ? data.updated_at.toDate() : (data.updated_at ? new Date(data.updated_at) : undefined)
+    } as RemoteCommand);
   });
   
   // Sort in-memory to avoid Firestore Index requirement
-  return commands.sort((a, b) => a.created_at.getTime() - b.created_at.getTime());
+  return commands.sort((a, b) => {
+    const timeA = a.created_at instanceof Date ? a.created_at.getTime() : new Date(a.created_at).getTime();
+    const timeB = b.created_at instanceof Date ? b.created_at.getTime() : new Date(b.created_at).getTime();
+    return timeA - timeB;
+  });
 };
 
 export const dbUpdateCommandResult = async (commandId: string, status: 'completed' | 'failed', result: string) => {

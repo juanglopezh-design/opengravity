@@ -1,0 +1,15 @@
+{
+  "name": "autonomous-airdrop-hunter",
+  "version": "1.0.0",
+  "description": "Bot automático para cultivar airdrops sin humanos",
+  "main": "brain.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node brain.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.12.0"
+  }
+}

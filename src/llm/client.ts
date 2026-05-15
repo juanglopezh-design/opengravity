@@ -23,11 +23,14 @@ export type LLMTool = OpenAI.Chat.ChatCompletionTool;
 export const chatCompletion = async (
   messages: LLMMessage[],
   tools?: LLMTool[],
-  fallbackToOpenRouter: boolean = true
+  fallbackToGroq: boolean = true
 ) => {
   try {
-    const response = await groqClient.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+    if (!openrouterClient) {
+      throw new Error('OpenRouter API key missing');
+    }
+    const response = await openrouterClient.chat.completions.create({
+      model: config.OPENROUTER_MODEL,
       messages,
       tools: tools?.length ? tools : undefined,
       tool_choice: tools?.length ? 'auto' : undefined,
@@ -35,17 +38,17 @@ export const chatCompletion = async (
     });
     return response.choices[0];
   } catch (error) {
-    console.error('Groq API Error:', error);
-    if (fallbackToOpenRouter && openrouterClient) {
-      console.log('Falling back to OpenRouter...', config.OPENROUTER_MODEL);
-      const openRouterResponse = await openrouterClient.chat.completions.create({
-        model: config.OPENROUTER_MODEL,
+    console.error('OpenRouter API Error:', error);
+    if (fallbackToGroq) {
+      console.log('Falling back to Groq...', 'llama-3.3-70b-versatile');
+      const groqResponse = await groqClient.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
         messages,
         tools: tools?.length ? tools : undefined,
         tool_choice: tools?.length ? 'auto' : undefined,
         temperature: 0.2,
       });
-      return openRouterResponse.choices[0];
+      return groqResponse.choices[0];
     }
     throw error;
   }

@@ -75,9 +75,79 @@ export const openUrlTool: AgentTool = {
   },
 };
 
+// Tool to read a local file
+export const readLocalFileTool: AgentTool = {
+  definition: {
+    type: 'function',
+    function: {
+      name: 'read_local_file',
+      description: 'Reads the contents of a file on your local PC.',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: { type: 'string', description: 'The absolute path to the file to read.' }
+        },
+        required: ['path'],
+      },
+    },
+  },
+  execute: async (args: { path: string }) => {
+    const commandId = await dbAddRemoteCommand('read_file', args);
+    return `Petición para leer archivo enviada a tu PC (ID: ${commandId}).`;
+  },
+};
+
+// Tool to write to a local file
+export const writeLocalFileTool: AgentTool = {
+  definition: {
+    type: 'function',
+    function: {
+      name: 'write_local_file',
+      description: 'Creates a new file or overwrites an existing file on your local PC.',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: { type: 'string', description: 'The absolute path to the file to write.' },
+          content: { type: 'string', description: 'The text content to write into the file.' }
+        },
+        required: ['path', 'content'],
+      },
+    },
+  },
+  execute: async (args: { path: string, content: string }) => {
+    const commandId = await dbAddRemoteCommand('write_file', args);
+    return `Petición para escribir archivo enviada a tu PC (ID: ${commandId}).`;
+  },
+};
+
+// Tool to list a local directory
+export const listLocalDirectoryTool: AgentTool = {
+  definition: {
+    type: 'function',
+    function: {
+      name: 'list_local_directory',
+      description: 'Lists the contents of a directory on your local PC.',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: { type: 'string', description: 'The absolute path to the directory to list.' }
+        },
+        required: ['path'],
+      },
+    },
+  },
+  execute: async (args: { path: string }) => {
+    const commandId = await dbAddRemoteCommand('list_dir', args);
+    return `Petición para listar directorio enviada a tu PC (ID: ${commandId}).`;
+  },
+};
+
 // Update registry
 toolsRegistry['execute_local_command'] = executeTerminalCommandTool;
 toolsRegistry['open_local_url'] = openUrlTool;
+toolsRegistry['read_local_file'] = readLocalFileTool;
+toolsRegistry['write_local_file'] = writeLocalFileTool;
+toolsRegistry['list_local_directory'] = listLocalDirectoryTool;
 
 export const getAvailableTools = (): LLMTool[] => {
   return Object.values(toolsRegistry).map(t => t.definition);

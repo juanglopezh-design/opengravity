@@ -4,8 +4,10 @@ import { config } from './src/config.js';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
-
 const execAsync = promisify(exec);
+
+// Log bridge start for debugging
+console.log('Bridge started');
 
 // Local Bridge Setup
 // If no Firebase credentials are provided via env vars AND no local service-account.json exists, abort.
@@ -29,7 +31,7 @@ async function pollCommands() {
   try {
     const pending = await dbGetPendingCommands();
     for (const cmd of pending) {
-      console.log(`📥 Ejecutando comando [${cmd.command}]:`, cmd.args);
+      console.log(`📥 Ejecutando comando [${cmd.command}]: ${JSON.stringify(cmd.args)}`);
       
       let result = '';
       let status: 'completed' | 'failed' = 'completed';
@@ -43,6 +45,16 @@ async function pollCommands() {
           const start = process.platform === 'win32' ? 'start' : process.platform === 'darwin' ? 'open' : 'xdg-open';
           await execAsync(`${start} ${cmd.args.url}`);
           result = `URL abierta: ${cmd.args.url}`;
+        } else if (cmd.command === 'read_file') {
+          const content = await fs.promises.readFile(cmd.args.path, 'utf8');
+          // Truncate if too large to avoid Firestore limits
+          result = content.length > 50000 ? content.substring(0, 50000) + '\n...[TRUNCATED]' : content;
+        } else if (cmd.command === 'write_file') {
+          await fs.promises.writeFile(cmd.args.path, cmd.args.content, 'utf8');
+          result = `Archivo escrito exitosamente en: ${cmd.args.path}`;
+        } else if (cmd.command === 'list_dir') {
+          const files = await fs.promises.readdir(cmd.args.path, { withFileTypes: true });
+          result = files.map((f: any) => `${f.isDirectory() ? '[DIR]' : '[FILE]'} ${f.name}`).join('\n');
         } else {
           result = `Error: Comando desconocido ${cmd.command}`;
           status = 'failed';
@@ -56,7 +68,7 @@ async function pollCommands() {
       console.log(`✅ Resultado enviado para ID ${cmd.id}`);
     }
   } catch (error: any) {
-    console.error('❌ Error en el loop de polling:', error.message || error);
+    console.error(`❌ Error en el loop de polling: ${error.message || error}`);
     if (error.stack) console.error(error.stack);
   }
 

@@ -31,27 +31,35 @@ export const runAgentLoop = async (userId: number, userMessage: string): Promise
     if (msg.role === 'tool') {
       messages.push({
         role: 'tool',
-        content: msg.content,
+        content: msg.content || '',
         tool_call_id: msg.tool_call_id as string
       });
     } else if (msg.role === 'assistant') {
-      // Need to handle assistant messages carefully (can involve tool calls)
-      if (msg.tool_calls) {
-        messages.push({
-          role: 'assistant',
-          content: msg.content || '',
-          tool_calls: JSON.parse(msg.tool_calls)
-        });
-      } else {
-        messages.push({
-          role: 'assistant',
-          content: msg.content || ''
-        });
+      let parsedToolCalls = msg.tool_calls ? JSON.parse(msg.tool_calls) : undefined;
+      
+      const assistantMsg: any = { role: 'assistant' };
+      // Omit content entirely if it's empty and we have tool calls (OpenRouter strictness)
+      if (msg.content) {
+        assistantMsg.content = msg.content;
       }
+      
+      if (parsedToolCalls) {
+        // Strip any extra properties that might cause a 400 (like logprobs, refusal, etc)
+        parsedToolCalls = parsedToolCalls.map((tc: any) => ({
+          id: tc.id,
+          type: tc.type,
+          function: {
+            name: tc.function.name,
+            arguments: tc.function.arguments
+          }
+        }));
+        assistantMsg.tool_calls = parsedToolCalls;
+      }
+      messages.push(assistantMsg as LLMMessage);
     } else {
       messages.push({
         role: msg.role as 'system' | 'user',
-        content: msg.content
+        content: msg.content || ''
       });
     }
   }
@@ -68,7 +76,15 @@ export const runAgentLoop = async (userId: number, userMessage: string): Promise
     
     // Check if the model wants to call a tool
     if (responseMessage.message.tool_calls && responseMessage.message.tool_calls.length > 0) {
-      const toolCalls = responseMessage.message.tool_calls;
+      // Strip any extra properties from the API before pushing to messages array (OpenRouter 400 fix)
+      const toolCalls = responseMessage.message.tool_calls.map((tc: any) => ({
+        id: tc.id,
+        type: tc.type,
+        function: {
+          name: tc.function.name,
+          arguments: tc.function.arguments
+        }
+      }));
       
       // Save assistant's tool calls intent to memory
       await dbAddMessage({
@@ -78,7 +94,16 @@ export const runAgentLoop = async (userId: number, userMessage: string): Promise
         tool_calls: JSON.stringify(toolCalls)
       });
       
-      messages.push(responseMessage.message);
+      // Clean up message for strict APIs (remove nulls/undefined)
+      const sanitizedAssistantMsg: any = { 
+        role: 'assistant',
+        tool_calls: toolCalls
+      };
+      if (responseMessage.message.content) {
+        sanitizedAssistantMsg.content = responseMessage.message.content;
+      }
+      
+      messages.push(sanitizedAssistantMsg as LLMMessage);
 
       // Execute all tool calls
       for (const toolCall of toolCalls) {

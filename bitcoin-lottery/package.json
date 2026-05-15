@@ -1,0 +1,15 @@
+{
+  "name": "bitcoin-lottery",
+  "version": "1.0.0",
+  "description": "Una simulación de lotería probabilística de llaves de Bitcoin",
+  "main": "lottery.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node lottery.js"
+  },
+  "dependencies": {
+    "bitcoinjs-lib": "^6.1.5",
+    "ecpair": "^2.1.0",
+    "tiny-secp256k1": "^2.2.3"
+  }
+}

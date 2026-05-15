@@ -1,5 +1,7 @@
 {
-  "projects": {},
+  "projects": {
+    "default": "contentflow-ai-juang26"
+  },
   "targets": {},
   "etags": {}
 }

@@ -33,6 +33,10 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: "3000"
+      - key: NEXT_PUBLIC_APP_URL
+        value: "https://contentflow-ai.onrender.com"
       - key: GEMINI_API_KEY
         value: "AIzaSyACZ_QGAYPvQAmg0fOf18jOapy-H1DbMnI"
       - key: NEXT_PUBLIC_FIREBASE_API_KEY
@@ -47,3 +51,14 @@ services:
         value: "939924050941"
       - key: NEXT_PUBLIC_FIREBASE_APP_ID
         value: "1:939924050941:web:0a595064b5ce861401bf94"
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_STARTER_PRICE_ID
+        sync: false
+      - key: STRIPE_PRO_PRICE_ID
+        sync: false
+
