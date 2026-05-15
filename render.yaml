@@ -1,64 +1,22 @@
 services:
-  - type: worker
-    name: opengravity
-    env: node
-    region: frankfurt
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: TELEGRAM_BOT_TOKEN
-        sync: false
-      - key: TELEGRAM_ALLOWED_USER_IDS
-        sync: false
-      - key: GROQ_API_KEY
-        sync: false
-      - key: OPENROUTER_API_KEY
-        sync: false
-      - key: OPENROUTER_MODEL
-        sync: false
-      - key: FORCE_REDEPLOY
-        value: "2026-03-08T14:30:00Z"
-      - key: FIREBASE_SERVICE_ACCOUNT
-        sync: false
-
   - type: web
-    name: contentflow-ai
-    env: node
-    region: frankfurt
-    rootDir: contentflow-ai
-    buildCommand: npm install && npm run build
-    startCommand: npm start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: "3000"
-      - key: NEXT_PUBLIC_APP_URL
-        value: "https://contentflow-ai.onrender.com"
-      - key: GEMINI_API_KEY
-        value: "AIzaSyACZ_QGAYPvQAmg0fOf18jOapy-H1DbMnI"
-      - key: NEXT_PUBLIC_FIREBASE_API_KEY
-        value: "AIzaSyBRp4j5_Yydv8U9zwoKskzGV4BUSxfINHs"
-      - key: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-        value: "contentflow-ai-juang26.firebaseapp.com"
-      - key: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-        value: "contentflow-ai-juang26"
-      - key: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-        value: "contentflow-ai-juang26.firebasestorage.app"
-      - key: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-        value: "939924050941"
-      - key: NEXT_PUBLIC_FIREBASE_APP_ID
-        value: "1:939924050941:web:0a595064b5ce861401bf94"
-      - key: STRIPE_SECRET_KEY
-        sync: false
-      - key: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-        sync: false
-      - key: STRIPE_WEBHOOK_SECRET
-        sync: false
-      - key: STRIPE_STARTER_PRICE_ID
-        sync: false
-      - key: STRIPE_PRO_PRICE_ID
-        sync: false
-
+      name: contentflow-ai
+          env: node
+              plan: free
+                  rootDir: contentflow-ai
+                      buildCommand: npm install && npm run build
+                          startCommand: npm start
+                              envVars:
+                                    - key: NEXT_PUBLIC_APP_URL
+                                            value: "https://contentflow-ai.onrender.com"
+                                                  - key: GEMINI_API_KEY
+                                                          value: "AIzaSyACZ_QGAYPvQAmg0fOf18jOapy-H1DbMnI"
+                                                                - key: NEXT_PUBLIC_FIREBASE_API_KEY
+                                                                        value: "AIzaSyBRp4j5_Yydv8U9zwoKskzGV4BUSxfINHs"
+                                                                              - key: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+                                                                                      value: "contentflow-ai-juang26.firebaseapp.com"
+                                                                                            - key: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+                                                                                                    value: "contentflow-ai-juang26"
+                                                                                                          - key: STRIPE_SECRET_KEY
+                                                                                                                  sync: false
+                                                                                                                  
