@@ -1,3 +1,0 @@
-module.exports=[58394,41198,64866,a=>{"use strict";var b=a.i(36334);a.s(["collection",()=>b.aX],58394);var c=a.i(92882);let d=(0,c.default)("copy",[["rect",{width:"14",height:"14",x:"8",y:"8",rx:"2",ry:"2",key:"17jyea"}],["path",{d:"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2",key:"zix9uf"}]]);a.s(["Copy",0,d],41198);let e=(0,c.default)("check",[["path",{d:"M20 6 9 17l-5-5",key:"1gmf2c"}]]);a.s(["Check",0,e],64866)}];
-
-//# sourceMappingURL=109t_%40firebase_firestore_dist_common-b12d6a5a_node_mjs_031s4m8._.js.map

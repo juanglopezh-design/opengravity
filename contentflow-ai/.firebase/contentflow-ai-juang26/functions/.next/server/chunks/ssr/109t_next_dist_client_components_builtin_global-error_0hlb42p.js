@@ -1,3 +1,0 @@
-module.exports=[19236,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(19899);a.n(d("[project]/contentflow-ai/node_modules/next/dist/client/components/builtin/global-error.js <module evaluation>"))},74293,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(19899);a.n(d("[project]/contentflow-ai/node_modules/next/dist/client/components/builtin/global-error.js"))},87238,a=>{"use strict";a.i(19236);var b=a.i(74293);a.n(b)},89122,a=>{a.n(a.i(87238))}];
-
-//# sourceMappingURL=109t_next_dist_client_components_builtin_global-error_0hlb42p.js.map

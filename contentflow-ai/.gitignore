@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# firebase build cache
+.firebase/
+
+# test/debug scripts
+find_model.mjs
+list_models.mjs
+test_gemini.mjs
