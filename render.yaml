@@ -38,3 +38,5 @@ services:
         sync: false
       - key: STRIPE_PRO_PRICE_ID
         sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
