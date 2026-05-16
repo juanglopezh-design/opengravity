@@ -1,10 +1,13 @@
 "use client";
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase";
 import styles from "./Pricing.module.css";
 
 const plans = [
   {
     name: "Free",
+    id: "free",
     price: "$0",
     period: "/siempre",
     desc: "Para probar y enamorarte",
@@ -15,12 +18,11 @@ const plans = [
       "Historial básico",
     ],
     cta: "Empezar gratis",
-    href: "/signup",
     highlight: false,
-    badge: null,
   },
   {
     name: "Starter",
+    id: "starter",
     price: "$9",
     period: "/mes",
     desc: "Para creadores que quieren crecer",
@@ -32,12 +34,12 @@ const plans = [
       "Soporte por email",
     ],
     cta: "Empezar con Starter",
-    href: "/signup?plan=starter",
     highlight: false,
-    badge: null,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID,
   },
   {
     name: "Pro",
+    id: "pro",
     price: "$29",
     period: "/mes",
     desc: "Para negocios y agencias serias",
@@ -51,13 +53,54 @@ const plans = [
       "Team workspace",
     ],
     cta: "Empezar con Pro",
-    href: "/signup?plan=pro",
     highlight: true,
     badge: "MÁS POPULAR",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
   },
 ];
 
 export default function Pricing() {
+  const router = useRouter();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleSelectPlan = async (plan: any) => {
+    if (plan.id === "free") {
+      router.push("/signup");
+      return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      router.push(`/login?redirect=/pricing&plan=${plan.id}`);
+      return;
+    }
+
+    setLoading(plan.id);
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          priceId: plan.priceId,
+          userId: user.uid,
+          userEmail: user.email,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Error al iniciar el pago. Inténtalo de nuevo.");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("Ocurrió un error inesperado.");
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
     <section className={styles.section} id="pricing">
       <div className="container">
@@ -97,14 +140,21 @@ export default function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Link
-                href={plan.href}
+              <button
+                onClick={() => handleSelectPlan(plan)}
                 className={plan.highlight ? "btn-primary" : "btn-secondary"}
                 id={`pricing-cta-${plan.name.toLowerCase()}`}
-                style={{ width: "100%", justifyContent: "center", marginTop: "auto" }}
+                disabled={loading === plan.id}
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  marginTop: "auto",
+                  cursor: loading === plan.id ? "not-allowed" : "pointer",
+                  opacity: loading === plan.id ? 0.7 : 1,
+                }}
               >
-                {plan.cta}
-              </Link>
+                {loading === plan.id ? "Cargando..." : plan.cta}
+              </button>
             </div>
           ))}
         </div>

@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import styles from "../login/auth.module.css";
 import { Suspense } from "react";
@@ -19,14 +19,19 @@ function SignupForm() {
   const [loading, setLoading] = useState(false);
 
   const createUserDoc = async (uid: string, displayName: string, userEmail: string) => {
-    await setDoc(doc(db, "users", uid), {
-      name: displayName,
-      email: userEmail,
-      plan: "free",
-      generationsUsed: 0,
-      generationsLimit: 10,
-      createdAt: serverTimestamp(),
-    });
+    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userRef);
+    
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        name: displayName,
+        email: userEmail,
+        plan: "free",
+        generationsUsed: 0,
+        generationsLimit: 10,
+        createdAt: serverTimestamp(),
+      });
+    }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
