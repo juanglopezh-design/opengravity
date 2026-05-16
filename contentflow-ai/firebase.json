@@ -10,8 +10,16 @@
       "localhost",
       "contentflow-ai-juang26.firebaseapp.com",
       "contentflow-ai-juang26.web.app",
-      "contentflow-ai.onrender.com"
-    ]
+      "contentflow-ai.onrender.com",
+      "contentflow-ai-ex6w.onrender.com"
+    ],
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "ContentFlow AI",
+        "supportEmail": "juanglopezh@gmail.com"
+      }
+    }
   },
   "hosting": {
     "site": "contentflow-ai-juang26",
