@@ -34,8 +34,9 @@ export default function LoginPage() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       router.push("/dashboard");
-    } catch {
-      setError("Error al iniciar sesión con Google.");
+    } catch (err: any) {
+      console.error("Google Login Error:", err);
+      setError(`Error de Google: ${err.code || err.message || "Error desconocido"}`);
     } finally {
       setLoading(false);
     }
