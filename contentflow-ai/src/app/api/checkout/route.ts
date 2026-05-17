@@ -3,17 +3,26 @@ import { stripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
   try {
-    const { priceId, userId, userEmail } = await req.json();
+    const { priceId, planId, userId, userEmail } = await req.json();
 
-    if (!priceId || !userId) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    let actualPriceId = priceId;
+    if (planId) {
+      if (planId === "pro") {
+        actualPriceId = process.env.STRIPE_PRO_PRICE_ID;
+      } else if (planId === "starter") {
+        actualPriceId = process.env.STRIPE_STARTER_PRICE_ID;
+      }
+    }
+
+    if (!actualPriceId || !userId) {
+      return NextResponse.json({ error: "Missing required fields: priceId/planId or userId" }, { status: 400 });
     }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
-          price: priceId,
+          price: actualPriceId,
           quantity: 1,
         },
       ],

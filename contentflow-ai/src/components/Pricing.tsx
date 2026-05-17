@@ -81,7 +81,7 @@ export default function Pricing() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          priceId: plan.priceId,
+          planId: plan.id,
           userId: user.uid,
           userEmail: user.email,
         }),

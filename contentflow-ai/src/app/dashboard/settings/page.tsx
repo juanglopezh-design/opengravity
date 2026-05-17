@@ -25,12 +25,36 @@ export default function SettingsPage() {
     fetchUser();
   }, []);
 
-  const handleCheckout = (plan: string) => {
-    alert(`En producción, esto abriría Stripe Checkout para el plan ${plan}.`);
-    // Aquí iría la integración real de Stripe:
-    // 1. Llamar a API /api/checkout con el plan
-    // 2. Recibir URL de Stripe
-    // 3. window.location.href = url
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
+  const handleCheckout = async (planId: string) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    setCheckoutLoading(planId);
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId,
+          userId: user.uid,
+          userEmail: user.email,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Error al iniciar el pago. Inténtalo de nuevo.");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      alert("Ocurrió un error inesperado.");
+    } finally {
+      setCheckoutLoading(null);
+    }
   };
 
   if (loading) return <div className={styles.loading}>Cargando configuración...</div>;
@@ -92,12 +116,26 @@ export default function SettingsPage() {
               
               <div className={styles.plans}>
                 {userData?.plan === "free" && (
-                  <button onClick={() => handleCheckout("starter")} className="btn-secondary">
-                    Plan Starter ($9/mes)
+                  <button 
+                    onClick={() => handleCheckout("starter")} 
+                    className="btn-secondary"
+                    disabled={checkoutLoading !== null}
+                  >
+                    {checkoutLoading === "starter" ? "Cargando..." : "Plan Starter ($9/mes)"}
                   </button>
                 )}
-                <button onClick={() => handleCheckout("pro")} className="btn-primary">
-                  <Sparkles size={16} /> Plan Pro ($29/mes)
+                <button 
+                  onClick={() => handleCheckout("pro")} 
+                  className="btn-primary"
+                  disabled={checkoutLoading !== null}
+                >
+                  {checkoutLoading === "pro" ? (
+                    "Cargando..."
+                  ) : (
+                    <>
+                      <Sparkles size={16} /> Plan Pro ($29/mes)
+                    </>
+                  )}
                 </button>
               </div>
             </div>
