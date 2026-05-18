@@ -40,20 +40,16 @@ export default function Dashboard() {
       const user = auth.currentUser;
       if (!user) throw new Error("No has iniciado sesión");
 
-      // Verify limits
-      const userRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
-
-      if (userData?.plan !== "pro" && userData?.generationsUsed >= userData?.generationsLimit) {
-        throw new Error("Has alcanzado tu límite de generaciones. Mejora tu plan para continuar.");
-      }
+      const token = await user.getIdToken();
 
       // Call API
       const response = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, type, tone, language, userId: user.uid }),
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ prompt, type, tone, language }),
       });
 
       const data = await response.json();
@@ -61,17 +57,6 @@ export default function Dashboard() {
       if (!response.ok) throw new Error(data.error);
 
       setResult(data.content);
-
-      // Save to history
-      await addDoc(collection(db, "users", user.uid, "history"), {
-        prompt,
-        type,
-        content: data.content,
-        createdAt: serverTimestamp(),
-      });
-
-      // Increment usage
-      await updateDoc(userRef, { generationsUsed: increment(1) });
 
     } catch (err: any) {
       setError(err.message || "Error al generar el contenido");

@@ -63,7 +63,7 @@ export default function Pricing() {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
-  const handleSelectPlan = async (plan: any) => {
+  const handleSelectPlan = async (plan: typeof plans[0]) => {
     if (plan.id === "free") {
       router.push("/signup");
       return;
@@ -89,7 +89,7 @@ export default function Pricing() {
 
       const data = await response.json();
       if (data.url) {
-        window.location.href = data.url;
+        window.location.assign(data.url);
       } else {
         alert("Error al iniciar el pago. Inténtalo de nuevo.");
       }
