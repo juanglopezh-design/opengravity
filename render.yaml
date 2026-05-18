@@ -3,7 +3,7 @@ services:
     name: contentflow-ai
     env: node
     plan: free
-    region: frankfurt
+    region: oregon
     rootDir: contentflow-ai
     buildCommand: "npm install && npm run build"
     startCommand: "npm start"
