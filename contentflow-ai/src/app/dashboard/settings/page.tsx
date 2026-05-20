@@ -32,12 +32,13 @@ export default function SettingsPage() {
     if (!user) return;
 
     setCheckoutLoading(planId);
+
     try {
-      const response = await fetch("/api/checkout", {
+      const response = await fetch("/api/checkout/nowpayments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          planId,
+          planId: planId,
           userId: user.uid,
           userEmail: user.email,
         }),
@@ -47,7 +48,7 @@ export default function SettingsPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || "Error al iniciar el pago. Inténtalo de nuevo.");
+        alert(data.error || "Error al iniciar el pago con criptomonedas. Inténtalo de nuevo.");
       }
     } catch (error) {
       console.error("Checkout error:", error);
@@ -84,7 +85,9 @@ export default function SettingsPage() {
             </div>
             <div className={styles.infoItem}>
               <span className={styles.label}>Plan Actual</span>
-              <span className={styles.valueBadge}>{userData?.plan || "free"}</span>
+              <span className={styles.valueBadge} style={{ textTransform: "capitalize" }}>
+                {userData?.plan || "free"}
+              </span>
             </div>
           </div>
         </div>
@@ -99,20 +102,31 @@ export default function SettingsPage() {
           <div className={styles.usageSection}>
             <div className={styles.usageHeader}>
               <span>Uso mensual</span>
-              <span>{userData?.generationsUsed || 0} / {userData?.plan === "pro" ? "∞" : (userData?.generationsLimit || 10)}</span>
+              <span>
+                {userData?.generationsUsed || 0} /{" "}
+                {userData?.plan === "pro" || userData?.plan === "business"
+                  ? "∞"
+                  : userData?.generationsLimit || 10}
+              </span>
             </div>
             <div className={styles.usageBar}>
               <div 
                 className={styles.usageFill} 
-                style={{ width: `${Math.min(100, ((userData?.generationsUsed || 0) / (userData?.generationsLimit || 10)) * 100)}%` }}
+                style={{ 
+                  width: `${
+                    userData?.plan === "pro" || userData?.plan === "business"
+                      ? 100
+                      : Math.min(100, ((userData?.generationsUsed || 0) / (userData?.generationsLimit || 10)) * 100)
+                  }%` 
+                }}
               ></div>
             </div>
           </div>
 
-          {userData?.plan !== "pro" && (
+          {userData?.plan !== "business" && (
             <div className={styles.upgradeSection}>
               <h3>Mejora tu plan</h3>
-              <p>Obtén generaciones ilimitadas y más características.</p>
+              <p>Obtén generaciones ilimitadas, agentes autónomos y más herramientas elite.</p>
               
               <div className={styles.plans}>
                 {userData?.plan === "free" && (
@@ -120,28 +134,36 @@ export default function SettingsPage() {
                     onClick={() => handleCheckout("starter")} 
                     className="btn-secondary"
                     disabled={checkoutLoading !== null}
+                    style={{ flex: 1 }}
                   >
-                    {checkoutLoading === "starter" ? "Cargando..." : "Plan Starter ($9/mes)"}
+                    Plan Starter ($9)
+                  </button>
+                )}
+                {(userData?.plan === "free" || userData?.plan === "starter") && (
+                  <button 
+                    onClick={() => handleCheckout("pro")} 
+                    className="btn-secondary"
+                    disabled={checkoutLoading !== null}
+                    style={{ flex: 1 }}
+                  >
+                    Plan Pro ($29)
                   </button>
                 )}
                 <button 
-                  onClick={() => handleCheckout("pro")} 
+                  onClick={() => handleCheckout("business")} 
                   className="btn-primary"
                   disabled={checkoutLoading !== null}
+                  style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 >
-                  {checkoutLoading === "pro" ? (
-                    "Cargando..."
-                  ) : (
-                    <>
-                      <Sparkles size={16} /> Plan Pro ($29/mes)
-                    </>
-                  )}
+                  <Sparkles size={16} /> Plan Business ($79)
                 </button>
               </div>
             </div>
           )}
         </div>
       </div>
+
+
     </div>
   );
 }

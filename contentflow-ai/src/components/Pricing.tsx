@@ -57,12 +57,32 @@ const plans = [
     badge: "MÁS POPULAR",
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
   },
+  {
+    name: "Business",
+    id: "business",
+    price: "$79",
+    period: "/mes",
+    desc: "Para agencias autónomas de élite",
+    features: [
+      "Todo lo de Pro",
+      "Agentes IA autónomos",
+      "Generación automática de TikToks",
+      "Publicación automática",
+      "IA para responder mensajes",
+      "Creación masiva de contenido",
+      "Soporte VIP dedicado 24/7",
+    ],
+    cta: "Empezar con Business",
+    highlight: false,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_BUSINESS_PRICE_ID || "price_mock_business",
+  },
 ];
 
 export default function Pricing() {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
-
+  
+  // Payment States
   const handleSelectPlan = async (plan: typeof plans[0]) => {
     if (plan.id === "free") {
       router.push("/signup");
@@ -76,8 +96,9 @@ export default function Pricing() {
     }
 
     setLoading(plan.id);
+
     try {
-      const response = await fetch("/api/checkout", {
+      const response = await fetch("/api/checkout/nowpayments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -91,7 +112,7 @@ export default function Pricing() {
       if (data.url) {
         window.location.assign(data.url);
       } else {
-        alert("Error al iniciar el pago. Inténtalo de nuevo.");
+        alert(data.error || "Error al iniciar el pago con criptomonedas. Inténtalo de nuevo.");
       }
     } catch (error) {
       console.error("Checkout error:", error);
@@ -105,13 +126,13 @@ export default function Pricing() {
     <section className={styles.section} id="pricing">
       <div className="container">
         <div className={styles.header}>
-          <div className="badge">💰 Precios</div>
+          <div className="badge">🪙 Criptomonedas</div>
           <h2 className={styles.title}>
             Planes simples,{" "}
             <span className="gradient-text">resultados extraordinarios</span>
           </h2>
           <p className={styles.subtitle}>
-            Empieza gratis. Escala cuando estés listo. Sin sorpresas ni letras pequeñas.
+            Empieza gratis. Escala cuando estés listo. Pago 100% seguro y anónimo con Cripto.
           </p>
         </div>
 
@@ -160,7 +181,7 @@ export default function Pricing() {
         </div>
 
         <p className={styles.note}>
-          💳 Sin tarjeta de crédito para el plan Free &nbsp;•&nbsp; Cancela en cualquier momento &nbsp;•&nbsp; Reembolso 30 días
+          🪙 Activación instantánea con Criptomonedas (USDT, BTC, ETH) &nbsp;•&nbsp; Sin tarjeta de crédito &nbsp;•&nbsp; Cancela cuando quieras
         </p>
       </div>
     </section>

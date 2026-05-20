@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -10,6 +10,7 @@ import { LayoutDashboard, History, Settings, LogOut, Sparkles } from "lucide-rea
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
@@ -59,15 +60,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <nav className={styles.nav}>
-          <Link href="/dashboard" className={`${styles.navItem} ${styles.active}`}>
+          <Link href="/dashboard" className={`${styles.navItem} ${pathname === "/dashboard" ? styles.active : ""}`}>
             <LayoutDashboard size={20} />
             <span>Generador</span>
           </Link>
-          <Link href="/dashboard/history" className={styles.navItem}>
+          <Link href="/dashboard/history" className={`${styles.navItem} ${pathname === "/dashboard/history" ? styles.active : ""}`}>
             <History size={20} />
             <span>Historial</span>
           </Link>
-          <Link href="/dashboard/settings" className={styles.navItem}>
+          <Link href="/dashboard/settings" className={`${styles.navItem} ${pathname === "/dashboard/settings" ? styles.active : ""}`}>
             <Settings size={20} />
             <span>Configuración</span>
           </Link>

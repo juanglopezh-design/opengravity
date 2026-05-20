@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
     }
 
-    if (userData.plan !== "pro" && userData.generationsUsed >= userData.generationsLimit) {
+    if (userData.plan !== "pro" && userData.plan !== "business" && userData.generationsUsed >= userData.generationsLimit) {
       return NextResponse.json({ error: "Has alcanzado tu límite de generaciones. Mejora tu plan para continuar." }, { status: 403 });
     }
 

@@ -148,3 +148,146 @@
   .grid { grid-template-columns: 1fr; }
   .plans { flex-direction: column; }
 }
+
+/* Payment Method Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modalContent {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modalHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 24px;
+}
+
+.modalTitle {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.modalSubtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.closeBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.paymentOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.optionCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.optionCard:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.selectedOption {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: var(--primary);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
+}
+
+.optionIcon {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.selectedOption .optionIcon {
+  color: var(--primary);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.optionText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.optionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.optionDesc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
