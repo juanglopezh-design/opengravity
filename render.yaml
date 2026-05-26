@@ -28,15 +28,9 @@ services:
         value: "939924050941"
       - key: NEXT_PUBLIC_FIREBASE_APP_ID
         value: "1:939924050941:web:0a595064b5ce861401bf94"
-      - key: STRIPE_SECRET_KEY
-        value: "sk_test_51TXh1MRelKz6KPZRjvvhzUCoKjCAFGxfNi4Dxy5hY4of9EYIl2c5SDwSQapkLI3LzbiAVRQJmLbdH3XGJbsa35NS00NV1ibjyt"
-      - key: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-        value: "pk_test_123"
-      - key: STRIPE_WEBHOOK_SECRET
-        value: "whsec_agyuFzmzl9Prx9WWCShdEPuIn9nmzwY9"
-      - key: STRIPE_STARTER_PRICE_ID
-        value: "price_1TYR0ZRelKz6KPZREQKLXDvt"
-      - key: STRIPE_PRO_PRICE_ID
-        value: "price_1TYR0oRelKz6KPZRdBETJzhZ"
+      - key: NOWPAYMENTS_API_KEY
+        value: "mock"
+      - key: NOWPAYMENTS_IPN_SECRET
+        value: "nowpayments_ipn_secret_placeholder"
       - key: FIREBASE_SERVICE_ACCOUNT
         sync: false
