@@ -5,7 +5,7 @@ services:
     plan: free
     region: oregon
     rootDir: contentflow-ai
-    buildCommand: "npm install && npm run build"
+    buildCommand: "npm ci && npm run build"
     startCommand: "npm start"
     envVars:
       - key: NODE_ENV
@@ -14,21 +14,27 @@ services:
         value: "20"
       - key: PORT
         value: "3000"
-      - key: NEXT_PUBLIC_APP_URL
-        value: "https://contentflow-ai-ex6w.onrender.com"
-      - key: GEMINI_API_KEY
-        value: "AIzaSyACZ_QGAYPvQAmg0fOf18jOapy-H1DbMnI"
-      - key: NEXT_PUBLIC_FIREBASE_API_KEY
-        value: "AIzaSyBRp4j5_Yydv8U9zwoKskzGV4BUSxfINHs"
-      - key: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-        value: "contentflow-ai-juang26.firebaseapp.com"
-      - key: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-        value: "contentflow-ai-juang26"
-      - key: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-        value: "contentflow-ai-juang26.firebasestorage.app"
-      - key: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-        value: "939924050941"
-      - key: NEXT_PUBLIC_FIREBASE_APP_ID
-        value: "1:939924050941:web:0a595064b5ce861401bf94"
       - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: BTC_WALLET_ADDRESS
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_BTC_WALLET_ADDRESS
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_APP_ID
         sync: false
