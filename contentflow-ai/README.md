@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ContentFlow AI
 
-## Getting Started
+SaaS de generación de contenido con IA (Gemini), autenticación Firebase y planes de pago con Bitcoin.
 
-First, run the development server:
+## Stack
+
+- **Next.js 15** (App Router) en [Render](https://render.com)
+- **Firebase** Auth + Firestore
+- **Google Gemini** para generación
+- **Bitcoin** (verificación on-chain vía mempool.space)
+
+## Desarrollo local
 
 ```bash
+cp .env.example .env.local
+# Completa las variables en .env.local
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables de entorno en Render
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+En el dashboard de Render → tu servicio → **Environment**, configura:
 
-## Learn More
+| Variable | Obligatoria | Descripción |
+|----------|-------------|-------------|
+| `GEMINI_API_KEY` | Sí | API key de Google AI Studio |
+| `FIREBASE_SERVICE_ACCOUNT` | Sí | JSON del service account (una línea) |
+| `NEXT_PUBLIC_FIREBASE_*` | Sí | Config del proyecto Firebase (cliente) |
+| `NEXT_PUBLIC_SITE_URL` | Sí | URL del servicio Render, ej. `https://contentflow-ai-ex6w.onrender.com` |
+| `NEXT_PUBLIC_API_URL` | Sí | Misma URL que `NEXT_PUBLIC_SITE_URL` si todo corre en Render |
+| `NEXT_PUBLIC_BTC_WALLET_ADDRESS` | Sí | Dirección BTC para checkout |
+| `BTC_WALLET_ADDRESS` | Recomendada | Misma dirección (servidor) |
+| `ALLOWED_ORIGINS` | Opcional | CORS adicionales separados por coma |
 
-To learn more about Next.js, take a look at the following resources:
+**Build command:** `npm ci && npm run build`  
+**Start command:** `npm start`  
+**Health check:** `/api/health`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Firebase
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Despliega reglas e índices:
 
-## Deploy on Vercel
+```bash
+firebase deploy --only firestore
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. En **Authentication → Settings → Authorized domains**, incluye tu URL de Render.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. Si usas **Firebase Hosting** para el front, define en el build de Hosting:
+
+```
+NEXT_PUBLIC_API_URL=https://tu-servicio.onrender.com
+```
+
+## Scripts
+
+| Comando | Descripción |
+|---------|-------------|
+| `npm run dev` | Servidor de desarrollo |
+| `npm run build` | Build de producción |
+| `npm start` | Servidor de producción |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Verificación TypeScript |
+
+## Verificar producción
+
+```bash
+node test_online_endpoints.mjs
+```
+
+## Estructura principal
+
+- `src/app/api/generate` — Generación con Gemini (auth + límites)
+- `src/app/api/webhooks/crypto-verify` — Verificación de pagos BTC
+- `src/app/dashboard` — Panel de usuario
+- `src/lib/config.ts` — URLs, wallet y planes centralizados

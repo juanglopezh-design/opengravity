@@ -2,7 +2,10 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { getApiUrl } from "@/lib/api-helper";
+import { btcWalletAddress, planGenerationLimits, planPricesUsd } from "@/lib/config";
 import {
   Copy,
   Check,
@@ -17,25 +20,6 @@ import {
 } from "lucide-react";
 import styles from "./crypto.module.css";
 
-// ─── CONFIGURACIÓN DE TU WALLET ─────────────────────────────────────────
-// Pon tu dirección de Bitcoin aquí. Cuando la tengas, cámbiala y redespliega.
-const WALLET_CONFIG = {
-  BTC: {
-    address: "bc1qazfthj3utl4m6hc536p0s32q2qteq9aueflj32",  // ← cambia esto por tu wallet real
-    network: "Bitcoin Mainnet",
-    label: "Bitcoin (BTC)",
-    explorer: "https://mempool.space/tx/",
-  },
-};
-
-// Precios por plan (en USD)
-const PLAN_PRICES: Record<string, number> = {
-  starter: 9,
-  pro: 29,
-  business: 79,
-};
-
-// BTC/USD rate aproximado (se actualiza al cargar la página)
 const FALLBACK_BTC_RATE = 68500;
 
 function CryptoCheckoutForm() {
@@ -45,18 +29,37 @@ function CryptoCheckoutForm() {
   const orderId = searchParams.get("order_id") || "";
   const planId = searchParams.get("plan_id") || "starter";
   const userEmail = searchParams.get("user_email") || "";
-  const priceUsd = PLAN_PRICES[planId] ?? 9;
+  const priceUsd = planPricesUsd[planId] ?? 9;
 
+  const [authReady, setAuthReady] = useState(false);
   const [btcRate, setBtcRate] = useState(FALLBACK_BTC_RATE);
   const [copied, setCopied] = useState(false);
   const [txHash, setTxHash] = useState("");
   const [status, setStatus] = useState<"waiting" | "verifying" | "success" | "error">("waiting");
   const [errorMsg, setErrorMsg] = useState("");
-  const [timer, setTimer] = useState(1799); // 30 min
+  const [timer, setTimer] = useState(1799);
   const [verifyAttempts, setVerifyAttempts] = useState(0);
 
   const btcAmount = (priceUsd / btcRate).toFixed(6);
-  const walletAddress = WALLET_CONFIG.BTC.address;
+  const walletAddress = btcWalletAddress;
+
+  useEffect(() => {
+    const returnUrl = `/checkout/crypto?${searchParams.toString()}`;
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.replace(`/login?redirect=${encodeURIComponent(returnUrl)}`);
+        return;
+      }
+      const orderUserId = orderId.split("___")[0];
+      if (orderUserId && orderUserId !== user.uid) {
+        setErrorMsg("Este pedido no pertenece a tu cuenta. Vuelve a elegir un plan.");
+        setAuthReady(true);
+        return;
+      }
+      setAuthReady(true);
+    });
+    return () => unsubscribe();
+  }, [orderId, router, searchParams]);
 
   // Fetch real BTC price
   useEffect(() => {
@@ -96,7 +99,9 @@ function CryptoCheckoutForm() {
       setErrorMsg("Por favor, ingresa el hash de tu transacción.");
       return;
     }
-    if (txHash.trim().length < 60) {
+    const isDevTestTx =
+      process.env.NODE_ENV === "development" && txHash.trim().startsWith("test_");
+    if (!isDevTestTx && txHash.trim().length < 60) {
       setErrorMsg("El hash de transacción parece incorrecto. Debe tener 64 caracteres.");
       return;
     }
@@ -106,9 +111,20 @@ function CryptoCheckoutForm() {
     setVerifyAttempts((p) => p + 1);
 
     try {
+      const user = auth.currentUser;
+      if (!user) {
+        setErrorMsg("Debes iniciar sesión para verificar el pago.");
+        setStatus("waiting");
+        return;
+      }
+
+      const token = await user.getIdToken();
       const response = await fetch(getApiUrl("/api/webhooks/crypto-verify"), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           txHash: txHash.trim(),
           orderId,
@@ -122,17 +138,18 @@ function CryptoCheckoutForm() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        // Save locally too for immediate UI refresh
-        const userId = orderId.split("___")[0];
-        if (userId) {
-          localStorage.setItem(
-            `contentflow_mock_upgrade_${userId}`,
-            JSON.stringify({
-              plan: planId,
-              generationsLimit: planId === "starter" ? 100 : 999999,
-              userId,
-            })
-          );
+        if (process.env.NODE_ENV === "development") {
+          const userId = orderId.split("___")[0];
+          if (userId) {
+            localStorage.setItem(
+              `contentflow_mock_upgrade_${userId}`,
+              JSON.stringify({
+                plan: planId,
+                generationsLimit: planGenerationLimits[planId] ?? 100,
+                userId,
+              })
+            );
+          }
         }
         setStatus("success");
         setTimeout(() => {
@@ -151,6 +168,22 @@ function CryptoCheckoutForm() {
       setErrorMsg("Error de red al verificar. Inténtalo de nuevo.");
     }
   };
+
+  if (!authReady) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          color: "var(--text-secondary)",
+        }}
+      >
+        Verificando sesión...
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>

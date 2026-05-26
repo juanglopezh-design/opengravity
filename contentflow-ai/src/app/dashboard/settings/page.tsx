@@ -4,6 +4,7 @@ import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import styles from "./settings.module.css";
 import { Bitcoin, Sparkles, User } from "lucide-react";
+import { isUnlimitedPlan } from "@/lib/config";
 
 export default function SettingsPage() {
   const [userData, setUserData] = useState<any>(null);
@@ -110,7 +111,7 @@ export default function SettingsPage() {
               <span>Uso mensual</span>
               <span>
                 {userData?.generationsUsed || 0} /{" "}
-                {userData?.plan === "pro" || userData?.plan === "business"
+                {isUnlimitedPlan(userData?.plan)
                   ? "∞"
                   : userData?.generationsLimit || 10}
               </span>
@@ -120,7 +121,7 @@ export default function SettingsPage() {
                 className={styles.usageFill} 
                 style={{ 
                   width: `${
-                    userData?.plan === "pro" || userData?.plan === "business"
+                    isUnlimitedPlan(userData?.plan)
                       ? 100
                       : Math.min(100, ((userData?.generationsUsed || 0) / (userData?.generationsLimit || 10)) * 100)
                   }%` 

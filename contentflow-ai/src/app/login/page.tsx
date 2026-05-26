@@ -3,7 +3,8 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, type User } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import styles from "./auth.module.css";
 
@@ -16,6 +17,21 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const ensureUserDoc = async (user: User) => {
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        name: user.displayName || "Usuario",
+        email: user.email || "",
+        plan: "free",
+        generationsUsed: 0,
+        generationsLimit: 10,
+        createdAt: serverTimestamp(),
+      });
+    }
+  };
 
   const routeAfterAuth = (user: User) => {
     if (redirect === "/pricing" && plan && plan !== "free") {
@@ -57,6 +73,7 @@ function LoginForm() {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
       const { user } = await signInWithPopup(auth, provider);
+      await ensureUserDoc(user);
       routeAfterAuth(user);
     } catch (err) {
       setError(getAuthErrorMessage(err, "No pudimos iniciar sesión con Google. Inténtalo de nuevo."));

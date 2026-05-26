@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
-import { auth, db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc } from "firebase/firestore";
+import { auth } from "@/lib/firebase";
 import styles from "./page.module.css";
 import { Copy, Check, Sparkles, RefreshCw } from "lucide-react";
 import { getApiUrl } from "@/lib/api-helper";
+import { useUserData } from "./UserDataContext";
 
 const contentTypes = [
   "Post de LinkedIn (Profesional)",
@@ -19,11 +19,12 @@ const tones = ["Profesional", "Inspirador", "Humorístico", "Directo", "Conversa
 const languages = ["Español", "Inglés", "Portugués", "Francés"];
 
 export default function Dashboard() {
+  const { applyUsageFromServer, refreshUserData } = useUserData();
   const [prompt, setPrompt] = useState("");
   const [type, setType] = useState(contentTypes[0]);
   const [tone, setTone] = useState(tones[0]);
   const [language, setLanguage] = useState(languages[0]);
-  
+
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   const [copied, setCopied] = useState(false);
@@ -43,12 +44,11 @@ export default function Dashboard() {
 
       const token = await user.getIdToken();
 
-      // Call API
       const response = await fetch(getApiUrl("/api/generate"), {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ prompt, type, tone, language }),
       });
@@ -59,8 +59,18 @@ export default function Dashboard() {
 
       setResult(data.content);
 
-    } catch (err: any) {
-      setError(err.message || "Error al generar el contenido");
+      if (typeof data.generationsUsed === "number") {
+        applyUsageFromServer({
+          generationsUsed: data.generationsUsed,
+          generationsLimit: data.generationsLimit,
+          plan: data.plan,
+        });
+      } else {
+        await refreshUserData();
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Error al generar el contenido";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -80,14 +90,13 @@ export default function Dashboard() {
       </header>
 
       <div className={styles.grid}>
-        {/* Form Column */}
         <div className={styles.formCol}>
           <form onSubmit={handleGenerate} className={`glass-card ${styles.card}`}>
             <div className={styles.field}>
               <label>¿De qué quieres hablar? *</label>
               <textarea
                 className="input-field"
-                placeholder="Ej: Tres consejos sobre cómo usar la Inteligencia Artificial para ahorrar tiempo en tareas diarias..."
+                placeholder="Ej: Tres consejos sobre cómo usar la Inteligencia Artificial para ahorrar tiempo..."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 required
@@ -99,42 +108,61 @@ export default function Dashboard() {
               <div className={styles.field}>
                 <label>Tipo de contenido</label>
                 <select className="input-field" value={type} onChange={(e) => setType(e.target.value)}>
-                  {contentTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+                  {contentTypes.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className={styles.field}>
                 <label>Tono</label>
                 <select className="input-field" value={tone} onChange={(e) => setTone(e.target.value)}>
-                  {tones.map((t) => <option key={t} value={t}>{t}</option>)}
+                  {tones.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
             <div className={styles.field}>
               <label>Idioma</label>
-              <select className="input-field" value={language} onChange={(e) => setLanguage(e.target.value)}>
-                {languages.map((l) => <option key={l} value={l}>{l}</option>)}
+              <select
+                className="input-field"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+              >
+                {languages.map((l) => (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                ))}
               </select>
             </div>
 
             {error && <div className={styles.error}>{error}</div>}
 
-            <button 
-              type="submit" 
-              className="btn-primary" 
+            <button
+              type="submit"
+              className="btn-primary"
               disabled={loading || !prompt.trim()}
               style={{ width: "100%", justifyContent: "center", marginTop: "10px", padding: "16px" }}
             >
               {loading ? (
-                <><RefreshCw size={18} className={styles.spin} /> Generando magia...</>
+                <>
+                  <RefreshCw size={18} className={styles.spin} /> Generando magia...
+                </>
               ) : (
-                <><Sparkles size={18} /> Generar contenido</>
+                <>
+                  <Sparkles size={18} /> Generar contenido
+                </>
               )}
             </button>
           </form>
         </div>
 
-        {/* Result Column */}
         <div className={styles.resultCol}>
           <div className={`glass-card ${styles.resultCard} ${result ? styles.hasResult : ""}`}>
             {result ? (
@@ -147,8 +175,11 @@ export default function Dashboard() {
                   </button>
                 </div>
                 <div className={styles.resultContent}>
-                  {result.split('\n').map((line, i) => (
-                    <span key={i}>{line}<br/></span>
+                  {result.split("\n").map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      <br />
+                    </span>
                   ))}
                 </div>
               </>

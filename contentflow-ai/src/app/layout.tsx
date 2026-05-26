@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://contentflow-ai-ex6w.onrender.com";
+import { siteUrl } from "@/lib/config";
 const siteTitle = "ContentFlow AI";
 const siteDescription =
   "La plataforma de IA para crear posts, emails y blogs listos para publicar en segundos.";

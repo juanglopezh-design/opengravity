@@ -1,21 +1,41 @@
 import admin from "firebase-admin";
 
-if (!admin.apps.length) {
+function initializeFirebaseAdmin() {
+  if (admin.apps.length) return;
+
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+
   try {
-    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    if (serviceAccountJson) {
+      const serviceAccount = JSON.parse(serviceAccountJson) as admin.ServiceAccount;
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
+        projectId: serviceAccount.projectId || projectId,
       });
-    } else {
-      admin.initializeApp({
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      });
+      return;
+    }
+
+    if (process.env.NODE_ENV === "development" && projectId) {
+      console.warn(
+        "[Firebase Admin] Sin FIREBASE_SERVICE_ACCOUNT — modo desarrollo con projectId únicamente."
+      );
+      admin.initializeApp({ projectId });
+      return;
+    }
+
+    console.error(
+      "[Firebase Admin] FIREBASE_SERVICE_ACCOUNT es obligatorio en producción (Render)."
+    );
+    if (projectId) {
+      admin.initializeApp({ projectId });
     }
   } catch (error) {
     console.error("Firebase Admin Initialization Error:", error);
   }
 }
+
+initializeFirebaseAdmin();
 
 export const adminDb = admin.firestore();
 export const adminAuth = admin.auth();

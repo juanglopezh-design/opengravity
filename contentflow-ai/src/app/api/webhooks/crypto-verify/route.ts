@@ -1,33 +1,77 @@
 import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth-server";
 import { adminDb } from "@/lib/firebase-admin";
+import { btcWalletAddress, planGenerationLimits } from "@/lib/config";
 import * as admin from "firebase-admin";
-
-// Dirección Bitcoin oficial de ContentFlow AI. Debe coincidir con el checkout.
-const YOUR_BTC_WALLET = "bc1qazfthj3utl4m6hc536p0s32q2qteq9aueflj32";
 
 export async function POST(req: Request) {
   try {
+    const authResult = await requireAuth(req);
+    if (!authResult.ok) return authResult.response;
+
     const { txHash, orderId, planId, btcAmount, walletAddress } = await req.json();
 
     if (!txHash || !orderId || !planId) {
       return NextResponse.json({ error: "Faltan parámetros requeridos." }, { status: 400 });
     }
 
-    // Validar que la wallet del request coincide con la nuestra
-    if (walletAddress && walletAddress !== YOUR_BTC_WALLET) {
-      console.warn("[CryptoVerify] Wallet address mismatch:", walletAddress);
-      // No fallamos por esto (puede ser el placeholder del dev), seguimos verificando
+    if (!btcWalletAddress) {
+      return NextResponse.json(
+        { error: "Wallet Bitcoin no configurada en el servidor." },
+        { status: 503 }
+      );
     }
 
-    // Extraer userId del orderId: "userId___planId___timestamp"
+    if (walletAddress && walletAddress !== btcWalletAddress) {
+      console.warn("[CryptoVerify] Wallet address mismatch:", walletAddress);
+    }
+
     const parts = orderId.split("___");
     if (parts.length < 2) {
       return NextResponse.json({ error: "Formato de order_id inválido." }, { status: 400 });
     }
-    const userId = parts[0];
 
-    // ─── VERIFICACIÓN EN BLOCKCHAIN (mempool.space — API pública, sin clave) ───
-    let txData: any = null;
+    const userId = parts[0];
+    const orderPlanId = parts[1];
+
+    if (userId !== authResult.uid) {
+      return NextResponse.json(
+        { error: "Este pedido no pertenece a tu cuenta." },
+        { status: 403 }
+      );
+    }
+
+    if (orderPlanId !== planId) {
+      return NextResponse.json(
+        { error: "El plan del pedido no coincide." },
+        { status: 400 }
+      );
+    }
+
+    if (!planGenerationLimits[planId] && planId !== "free") {
+      return NextResponse.json({ error: "Plan no válido." }, { status: 400 });
+    }
+
+    try {
+      const existingTx = await adminDb
+        .collection("users")
+        .where("btcTxHash", "==", txHash)
+        .limit(1)
+        .get();
+      if (!existingTx.empty) {
+        return NextResponse.json(
+          { error: "Esta transacción ya fue utilizada para activar un plan." },
+          { status: 409 }
+        );
+      }
+    } catch (indexError) {
+      console.warn("[CryptoVerify] Duplicate TX check skipped:", indexError);
+    }
+
+    let txData: {
+      status?: { confirmed?: boolean };
+      vout?: Array<{ scriptpubkey_address?: string; value?: number }>;
+    } | null = null;
     let verificationSource = "none";
 
     try {
@@ -39,14 +83,12 @@ export async function POST(req: Request) {
       if (mempoolRes.ok) {
         txData = await mempoolRes.json();
         verificationSource = "mempool.space";
-      } else {
-        console.warn(`[CryptoVerify] mempool.space returned ${mempoolRes.status} for tx ${txHash}`);
       }
-    } catch (fetchErr: any) {
-      console.warn("[CryptoVerify] mempool.space fetch failed:", fetchErr.message);
+    } catch (fetchErr) {
+      const message = fetchErr instanceof Error ? fetchErr.message : "fetch failed";
+      console.warn("[CryptoVerify] mempool.space fetch failed:", message);
     }
 
-    // Fallback: blockchair API
     if (!txData) {
       try {
         const blockchairRes = await fetch(
@@ -56,87 +98,92 @@ export async function POST(req: Request) {
         if (blockchairRes.ok) {
           const blockchairData = await blockchairRes.json();
           if (blockchairData?.data?.length > 0) {
-            // Adapt blockchair format to our checks
             const bcTx = blockchairData.data[0].transaction;
             txData = {
-              status: { confirmed: bcTx.block_id > 0, block_height: bcTx.block_id },
-              vout: blockchairData.data[0].outputs?.map((o: any) => ({
-                scriptpubkey_address: o.recipient,
-                value: Math.round(o.value * 1e8), // convert BTC to satoshis
-              })) || [],
+              status: { confirmed: bcTx.block_id > 0 },
+              vout:
+                blockchairData.data[0].outputs?.map(
+                  (o: { recipient?: string; value?: number }) => ({
+                    scriptpubkey_address: o.recipient,
+                    value: Math.round((o.value ?? 0) * 1e8),
+                  })
+                ) || [],
             };
             verificationSource = "blockchair";
           }
         }
-      } catch (bcErr: any) {
-        console.warn("[CryptoVerify] blockchair fetch failed:", bcErr.message);
+      } catch (bcErr) {
+        const message = bcErr instanceof Error ? bcErr.message : "fetch failed";
+        console.warn("[CryptoVerify] blockchair fetch failed:", message);
       }
     }
 
-    // ─── MODO DESARROLLO: si no hay wallet real configurada, simular verificación ───
     const isDevMode =
-      process.env.NODE_ENV === "development" ||
-      (YOUR_BTC_WALLET as string) === "TU_DIRECCION_BTC_AQUI" ||
-      txHash.startsWith("test_");
+      process.env.NODE_ENV === "development" &&
+      (txHash.startsWith("test_") || !btcWalletAddress);
 
     if (!txData) {
       if (isDevMode) {
-        console.warn("[CryptoVerify] Dev mode: no blockchain data found, simulating success for testing.");
-        // En dev sin wallet real, aceptamos cualquier TX hash de 64 chars
         txData = {
-          status: { confirmed: true, block_height: 999999 },
-          vout: [{ scriptpubkey_address: YOUR_BTC_WALLET, value: Math.round(parseFloat(btcAmount) * 1e8) }],
+          status: { confirmed: true },
+          vout: [
+            {
+              scriptpubkey_address: btcWalletAddress,
+              value: Math.round(parseFloat(btcAmount || "0") * 1e8),
+            },
+          ],
         };
         verificationSource = "dev-simulation";
       } else {
-        return NextResponse.json({
-          error:
-            "No encontramos esa transacción en la blockchain. Asegúrate de haber copiado bien el TX ID y de que la transacción haya sido enviada.",
-        }, { status: 404 });
+        return NextResponse.json(
+          {
+            error:
+              "No encontramos esa transacción en la blockchain. Verifica el TX ID y que la transacción se haya enviado.",
+          },
+          { status: 404 }
+        );
       }
     }
 
-    // ─── VALIDAR CONFIRMACIONES ───
     const confirmed = txData?.status?.confirmed === true;
     if (!confirmed && !isDevMode) {
-      return NextResponse.json({
-        error: `La transacción aún no tiene confirmaciones suficientes. Por favor, espera unos minutos más y vuelve a intentarlo.`,
-      }, { status: 422 });
+      return NextResponse.json(
+        {
+          error:
+            "La transacción aún no tiene confirmaciones. Espera unos minutos e inténtalo de nuevo.",
+        },
+        { status: 422 }
+      );
     }
 
-    // ─── VALIDAR DESTINATARIO ───
-    // Comprobar que alguna salida de la TX va a nuestra wallet
-    const outputs: Array<{ scriptpubkey_address?: string; value?: number }> = txData?.vout || [];
-    const ourOutput = outputs.find(
-      (out) => out.scriptpubkey_address === YOUR_BTC_WALLET
-    );
+    const outputs = txData?.vout || [];
+    const ourOutput = outputs.find((out) => out.scriptpubkey_address === btcWalletAddress);
 
     if (!ourOutput && !isDevMode) {
-      return NextResponse.json({
-        error:
-          "Esta transacción no está dirigida a nuestra dirección de Bitcoin. Asegúrate de haber enviado el pago a la dirección correcta.",
-      }, { status: 422 });
+      return NextResponse.json(
+        {
+          error:
+            "Esta transacción no está dirigida a nuestra dirección de Bitcoin.",
+        },
+        { status: 422 }
+      );
     }
 
-    // ─── VALIDAR MONTO (con 5% de tolerancia por variación del tipo de cambio) ───
     if (ourOutput && btcAmount) {
       const paidSats = ourOutput.value ?? 0;
       const expectedSats = Math.round(parseFloat(btcAmount) * 1e8);
-      const tolerance = expectedSats * 0.05; // 5%
+      const tolerance = expectedSats * 0.05;
       if (paidSats < expectedSats - tolerance && !isDevMode) {
-        return NextResponse.json({
-          error: `El monto recibido (${(paidSats / 1e8).toFixed(6)} BTC) es menor al requerido (${btcAmount} BTC). Contacta soporte con tu TX ID.`,
-        }, { status: 422 });
+        return NextResponse.json(
+          {
+            error: `El monto recibido (${(paidSats / 1e8).toFixed(6)} BTC) es menor al requerido (${btcAmount} BTC).`,
+          },
+          { status: 422 }
+        );
       }
     }
 
-    // ─── TODO OK: ACTUALIZAR PLAN EN FIRESTORE ───
-    const planLimits: Record<string, number> = {
-      starter: 100,
-      pro: 999999,
-      business: 999999,
-    };
-    const generationsLimit = planLimits[planId] ?? 100;
+    const generationsLimit = planGenerationLimits[planId] ?? 100;
 
     try {
       await adminDb.collection("users").doc(userId).set(
@@ -152,24 +199,24 @@ export async function POST(req: Request) {
       );
 
       console.log(
-        `[CryptoVerify] ✅ Plan '${planId}' activado para usuario ${userId} via TX ${txHash} (fuente: ${verificationSource})`
+        `[CryptoVerify] Plan '${planId}' activado para ${userId} (TX ${txHash}, ${verificationSource})`
       );
-    } catch (dbError: any) {
+    } catch (dbError) {
       console.error("[CryptoVerify] Firestore error:", dbError);
-
-      // En dev o si es simulación, dejamos pasar aunque falle Firestore
-      if (isDevMode || verificationSource === "dev-simulation") {
-        console.warn("[CryptoVerify] Dev mode: Firestore failed but returning success.");
+      if (isDevMode) {
         return NextResponse.json({
           success: true,
-          warning: "Firestore update failed locally. Plan will be reflected via localStorage.",
+          warning: "Firestore no disponible en local.",
           plan: planId,
           userId,
           txHash,
           verificationSource,
         });
       }
-      return NextResponse.json({ error: "Error al activar el plan. Contacta soporte con tu TX ID." }, { status: 500 });
+      return NextResponse.json(
+        { error: "Error al activar el plan. Contacta soporte con tu TX ID." },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -179,10 +226,12 @@ export async function POST(req: Request) {
       txHash,
       verificationSource,
       confirmed,
+      generationsLimit,
     });
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error interno del servidor.";
     console.error("[CryptoVerify] Unexpected error:", error);
-    return NextResponse.json({ error: error.message || "Error interno del servidor." }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

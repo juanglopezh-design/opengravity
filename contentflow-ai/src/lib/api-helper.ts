@@ -1,10 +1,19 @@
+import { apiBaseUrl } from "@/lib/config";
+
+const FIREBASE_HOSTING_SUFFIXES = ["web.app", "firebaseapp.com"];
+
 export function getApiUrl(path: string): string {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname;
-    // Si la app está cargada desde Firebase Hosting, forzamos las llamadas API al backend real de Render
-    if (hostname.includes("web.app") || hostname.includes("firebaseapp.com")) {
-      return `https://contentflow-ai-ex6w.onrender.com${path}`;
+    const onFirebaseHosting = FIREBASE_HOSTING_SUFFIXES.some((suffix) =>
+      hostname.endsWith(suffix)
+    );
+    if (onFirebaseHosting && apiBaseUrl) {
+      return `${apiBaseUrl}${normalizedPath}`;
     }
   }
-  return path;
+
+  return normalizedPath;
 }

@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
+import { btcWalletAddress } from "@/lib/config";
 import styles from "./Pricing.module.css";
 
 const plans = [
@@ -157,7 +158,7 @@ export default function Pricing() {
         </div>
 
         <p className={styles.note}>
-          ₿ Activación con Bitcoin Mainnet &nbsp;•&nbsp; Sin tarjeta de crédito &nbsp;•&nbsp; Wallet: bc1qazfthj3utl4m6hc536p0s32q2qteq9aueflj32
+          ₿ Activación con Bitcoin Mainnet &nbsp;•&nbsp; Sin tarjeta de crédito &nbsp;•&nbsp; Wallet: {btcWalletAddress}
         </p>
       </div>
     </section>

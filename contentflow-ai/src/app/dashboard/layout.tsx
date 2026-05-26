@@ -1,80 +1,42 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import Link from "next/link";
 import styles from "./layout.module.css";
 import { LayoutDashboard, History, Settings, LogOut, Sparkles } from "lucide-react";
+import { UserDataProvider, useUserData } from "./UserDataContext";
+import { isUnlimitedPlan } from "@/lib/config";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+function DashboardShell({ user, children }: { user: User; children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
-  const [userData, setUserData] = useState<any>(null);
+  const searchParams = useSearchParams();
+  const { userData, refreshUserData } = useUserData();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (!currentUser) {
-        router.push("/login");
-      } else {
-        setUser(currentUser);
-        // Fetch user plan data
-        const docRef = doc(db, "users", currentUser.uid);
-        let data: any = null;
-        try {
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            data = docSnap.data();
-          }
-        } catch (e) {
-          console.warn("Could not fetch user doc from Firestore:", e);
-        }
-
-        // Local simulation fallback for dev mode
-        if (process.env.NODE_ENV === "development") {
-          try {
-            const mockUpgradeStr = localStorage.getItem(`contentflow_mock_upgrade_${currentUser.uid}`);
-            if (mockUpgradeStr) {
-              const mockUpgrade = JSON.parse(mockUpgradeStr);
-              data = {
-                ...data,
-                plan: mockUpgrade.plan,
-                generationsLimit: mockUpgrade.generationsLimit,
-              };
-            }
-          } catch (storageError) {
-            console.error("Local storage read error:", storageError);
-          }
-        }
-
-        setUserData(data);
-        setLoading(false);
-      }
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
-  if (loading) {
-    return (
-      <div className={styles.loader}>
-        <div className={styles.spinner}></div>
-        <p>Cargando tu espacio...</p>
-      </div>
-    );
-  }
+    if (searchParams.get("payment") === "success") {
+      refreshUserData();
+      router.replace("/dashboard");
+    }
+  }, [searchParams, refreshUserData, router]);
 
   const handleLogout = async () => {
     await signOut(auth);
     router.push("/");
   };
 
+  const usagePercent =
+    isUnlimitedPlan(userData?.plan)
+      ? 100
+      : Math.min(
+          100,
+          ((userData?.generationsUsed || 0) / (userData?.generationsLimit || 10)) * 100
+        );
+
   return (
     <div className={styles.layout}>
-      {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
           <Link href="/dashboard" className={styles.logo}>
@@ -84,15 +46,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <nav className={styles.nav}>
-          <Link href="/dashboard" className={`${styles.navItem} ${pathname === "/dashboard" ? styles.active : ""}`}>
+          <Link
+            href="/dashboard"
+            className={`${styles.navItem} ${pathname === "/dashboard" ? styles.active : ""}`}
+          >
             <LayoutDashboard size={20} />
             <span>Generador</span>
           </Link>
-          <Link href="/dashboard/history" className={`${styles.navItem} ${pathname === "/dashboard/history" ? styles.active : ""}`}>
+          <Link
+            href="/dashboard/history"
+            className={`${styles.navItem} ${pathname === "/dashboard/history" ? styles.active : ""}`}
+          >
             <History size={20} />
             <span>Historial</span>
           </Link>
-          <Link href="/dashboard/settings" className={`${styles.navItem} ${pathname === "/dashboard/settings" ? styles.active : ""}`}>
+          <Link
+            href="/dashboard/settings"
+            className={`${styles.navItem} ${pathname === "/dashboard/settings" ? styles.active : ""}`}
+          >
             <Settings size={20} />
             <span>Configuración</span>
           </Link>
@@ -101,18 +72,26 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className={styles.planCard}>
           <div className={styles.planHeader}>
             <Sparkles size={16} className={styles.planIcon} />
-            <span>Plan {userData?.plan === "pro" ? "Pro" : userData?.plan === "business" ? "Business" : userData?.plan === "starter" ? "Starter" : "Free"}</span>
+            <span>
+              Plan{" "}
+              {userData?.plan === "pro"
+                ? "Pro"
+                : userData?.plan === "business"
+                  ? "Business"
+                  : userData?.plan === "starter"
+                    ? "Starter"
+                    : "Free"}
+            </span>
           </div>
           <div className={styles.usageBar}>
-            <div 
-              className={styles.usageFill} 
-              style={{ width: `${(userData?.plan === "pro" || userData?.plan === "business") ? 100 : Math.min(100, ((userData?.generationsUsed || 0) / (userData?.generationsLimit || 10)) * 100)}%` }}
-            ></div>
+            <div className={styles.usageFill} style={{ width: `${usagePercent}%` }} />
           </div>
           <p className={styles.usageText}>
-            {userData?.generationsUsed || 0} / {(userData?.plan === "pro" || userData?.plan === "business") ? "∞" : (userData?.generationsLimit || 10)} generaciones
+            {userData?.generationsUsed || 0} /{" "}
+            {isUnlimitedPlan(userData?.plan) ? "∞" : userData?.generationsLimit || 10}{" "}
+            generaciones
           </p>
-          {(userData?.plan !== "pro" && userData?.plan !== "business") && (
+          {!isUnlimitedPlan(userData?.plan) && (
             <Link href="/dashboard/settings" className={styles.upgradeBtn}>
               Mejorar plan
             </Link>
@@ -120,10 +99,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className={styles.userProfile}>
-          <div className={styles.avatar}>{user?.displayName?.charAt(0) || user?.email?.charAt(0) || "U"}</div>
+          <div className={styles.avatar}>
+            {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
+          </div>
           <div className={styles.userInfo}>
-            <span className={styles.userName}>{user?.displayName || "Usuario"}</span>
-            <span className={styles.userEmail}>{user?.email}</span>
+            <span className={styles.userName}>{user.displayName || "Usuario"}</span>
+            <span className={styles.userEmail}>{user.email}</span>
           </div>
           <button onClick={handleLogout} className={styles.logoutBtn} title="Cerrar sesión">
             <LogOut size={18} />
@@ -131,10 +112,42 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className={styles.main}>
-        {children}
-      </main>
+      <main className={styles.main}>{children}</main>
     </div>
+  );
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (!currentUser) {
+        router.push("/login");
+      } else {
+        setUser(currentUser);
+        setLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
+  if (loading || !user) {
+    return (
+      <div className={styles.loader}>
+        <div className={styles.spinner} />
+        <p>Cargando tu espacio...</p>
+      </div>
+    );
+  }
+
+  return (
+    <UserDataProvider userId={user.uid}>
+      <Suspense>
+        <DashboardShell user={user}>{children}</DashboardShell>
+      </Suspense>
+    </UserDataProvider>
   );
 }
