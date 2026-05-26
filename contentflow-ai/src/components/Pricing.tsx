@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import styles from "./Pricing.module.css";
@@ -35,7 +34,6 @@ const plans = [
     ],
     cta: "Empezar con Starter",
     highlight: false,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID,
   },
   {
     name: "Pro",
@@ -55,7 +53,6 @@ const plans = [
     cta: "Empezar con Pro",
     highlight: true,
     badge: "MÁS POPULAR",
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
   },
   {
     name: "Business",
@@ -74,16 +71,14 @@ const plans = [
     ],
     cta: "Empezar con Business",
     highlight: false,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_BUSINESS_PRICE_ID || "price_mock_business",
   },
 ];
 
 export default function Pricing() {
   const router = useRouter();
-  const [loading, setLoading] = useState<string | null>(null);
   
-  // Payment States
-  const handleSelectPlan = async (plan: typeof plans[0]) => {
+  // Payment States — Crypto directo (sin API route intermedia)
+  const handleSelectPlan = (plan: typeof plans[0]) => {
     if (plan.id === "free") {
       router.push("/signup");
       return;
@@ -95,31 +90,15 @@ export default function Pricing() {
       return;
     }
 
-    setLoading(plan.id);
+    // Generamos el orderId en el cliente para evitar depender del servidor
+    const orderId = `${user.uid}___${plan.id}___${Date.now()}`;
+    const params = new URLSearchParams({
+      order_id: orderId,
+      plan_id: plan.id,
+      user_email: user.email || "",
+    });
 
-    try {
-      const response = await fetch("/api/checkout/nowpayments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId: plan.id,
-          userId: user.uid,
-          userEmail: user.email,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.url) {
-        window.location.assign(data.url);
-      } else {
-        alert(data.error || "Error al iniciar el pago con criptomonedas. Inténtalo de nuevo.");
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      alert("Ocurrió un error inesperado.");
-    } finally {
-      setLoading(null);
-    }
+    router.push(`/checkout/crypto?${params.toString()}`);
   };
 
   return (
@@ -165,16 +144,13 @@ export default function Pricing() {
                 onClick={() => handleSelectPlan(plan)}
                 className={plan.highlight ? "btn-primary" : "btn-secondary"}
                 id={`pricing-cta-${plan.name.toLowerCase()}`}
-                disabled={loading === plan.id}
                 style={{
                   width: "100%",
                   justifyContent: "center",
                   marginTop: "auto",
-                  cursor: loading === plan.id ? "not-allowed" : "pointer",
-                  opacity: loading === plan.id ? 0.7 : 1,
                 }}
               >
-                {loading === plan.id ? "Cargando..." : plan.cta}
+                {plan.cta}
               </button>
             </div>
           ))}

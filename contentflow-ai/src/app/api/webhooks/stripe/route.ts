@@ -7,6 +7,10 @@ import * as admin from "firebase-admin";
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export async function POST(req: Request) {
+  if (!stripe) {
+    return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
+  }
+
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
 
@@ -19,6 +23,7 @@ export async function POST(req: Request) {
     console.error(`Webhook Error: ${err.message}`);
     return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
   }
+
 
   // Handle the event
   switch (event.type) {

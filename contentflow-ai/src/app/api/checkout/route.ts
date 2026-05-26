@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
 export async function POST(req: Request) {
+  if (!stripe) {
+    return NextResponse.json({ error: "Stripe is not configured on this server." }, { status: 503 });
+  }
+
   try {
     const { priceId, planId, userId, userEmail } = await req.json();
 
@@ -41,3 +45,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

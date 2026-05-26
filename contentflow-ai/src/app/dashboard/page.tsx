@@ -4,6 +4,7 @@ import { auth, db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc } from "firebase/firestore";
 import styles from "./page.module.css";
 import { Copy, Check, Sparkles, RefreshCw } from "lucide-react";
+import { getApiUrl } from "@/lib/api-helper";
 
 const contentTypes = [
   "Post de LinkedIn (Profesional)",
@@ -43,7 +44,7 @@ export default function Dashboard() {
       const token = await user.getIdToken();
 
       // Call API
-      const response = await fetch("/api/generate", {
+      const response = await fetch(getApiUrl("/api/generate"), {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

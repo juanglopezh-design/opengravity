@@ -92,3 +92,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204 });
+}

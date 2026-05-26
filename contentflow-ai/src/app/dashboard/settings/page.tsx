@@ -51,35 +51,19 @@ export default function SettingsPage() {
 
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
-  const handleCheckout = async (planId: string) => {
+  const handleCheckout = (planId: string) => {
     const user = auth.currentUser;
     if (!user) return;
 
-    setCheckoutLoading(planId);
+    // Redirigir directo a la página de pago crypto (sin API route intermedia)
+    const orderId = `${user.uid}___${planId}___${Date.now()}`;
+    const params = new URLSearchParams({
+      order_id: orderId,
+      plan_id: planId,
+      user_email: user.email || "",
+    });
 
-    try {
-      const response = await fetch("/api/checkout/nowpayments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId: planId,
-          userId: user.uid,
-          userEmail: user.email,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.error || "Error al iniciar el pago con criptomonedas. Inténtalo de nuevo.");
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      alert("Ocurrió un error inesperado.");
-    } finally {
-      setCheckoutLoading(null);
-    }
+    window.location.href = `/checkout/crypto?${params.toString()}`;
   };
 
   if (loading) return <div className={styles.loading}>Cargando configuración...</div>;
