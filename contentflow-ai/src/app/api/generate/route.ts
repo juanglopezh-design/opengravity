@@ -29,8 +29,24 @@ export async function POST(req: Request) {
     }
 
     const userRef = adminDb.collection("users").doc(userId);
-    const userDoc = await userRef.get();
-    const userData = userDoc.data();
+    let userData: any = null;
+    try {
+      const userDoc = await userRef.get();
+      userData = userDoc.data();
+    } catch (dbError: any) {
+      console.error("Firestore Admin error in generate route:", dbError);
+      if (process.env.NODE_ENV === "development") {
+        console.warn("Using mock userData fallback for local development.");
+        // Mock userData to allow local testing without valid credentials
+        userData = {
+          plan: "business", // fallback to business for easy testing
+          generationsLimit: 999999,
+          generationsUsed: 0
+        };
+      } else {
+        return NextResponse.json({ error: "Error de base de datos" }, { status: 500 });
+      }
+    }
 
     if (!userData) {
       return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
@@ -49,17 +65,24 @@ export async function POST(req: Request) {
     );
 
     // Save to history and increment usage concurrently
-    await Promise.all([
-      userRef.collection("history").add({
-        prompt,
-        type,
-        content: generatedText,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      }),
-      userRef.update({
-        generationsUsed: admin.firestore.FieldValue.increment(1)
-      })
-    ]);
+    try {
+      await Promise.all([
+        userRef.collection("history").add({
+          prompt,
+          type,
+          content: generatedText,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        }),
+        userRef.update({
+          generationsUsed: admin.firestore.FieldValue.increment(1)
+        })
+      ]);
+    } catch (saveError: any) {
+      console.error("Failed to save history/increment usage:", saveError);
+      if (process.env.NODE_ENV !== "development") {
+        return NextResponse.json({ error: "Error al guardar el historial" }, { status: 500 });
+      }
+    }
 
     return NextResponse.json({ content: generatedText });
   } catch (error: unknown) {

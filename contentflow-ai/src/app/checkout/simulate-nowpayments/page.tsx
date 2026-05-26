@@ -105,7 +105,16 @@ function SimulationForm() {
         }),
       });
 
+      const data = await response.json();
       if (response.ok) {
+        const extractedUserId = orderId.split("___")[0];
+        if (extractedUserId) {
+          localStorage.setItem(`contentflow_mock_upgrade_${extractedUserId}`, JSON.stringify({
+            plan: planId,
+            generationsLimit: planId === "starter" ? 100 : 999999,
+            userId: extractedUserId
+          }));
+        }
         setStatus("success");
         setTimeout(() => {
           router.push("/dashboard?payment=success&gateway=nowpayments");

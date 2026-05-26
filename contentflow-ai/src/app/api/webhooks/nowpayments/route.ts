@@ -73,18 +73,37 @@ export async function POST(req: Request) {
         generationsLimit = 999999;
       }
 
-      await adminDb.collection("users").doc(userId).set({
-        plan: planId,
-        generationsLimit: generationsLimit,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        // Clear any old Stripe subscriptions if upgrading via crypto
-        stripeSubscriptionId: null,
-        stripeCustomerId: null,
-        nowpaymentsOrderId: order_id,
-        nowpaymentsStatus: payment_status,
-      }, { merge: true });
+      try {
+        await adminDb.collection("users").doc(userId).set({
+          plan: planId,
+          generationsLimit: generationsLimit,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          // Clear any old Stripe subscriptions if upgrading via crypto
+          stripeSubscriptionId: null,
+          stripeCustomerId: null,
+          nowpaymentsOrderId: order_id,
+          nowpaymentsStatus: payment_status,
+        }, { merge: true });
 
-      console.log(`Successfully upgraded user ${userId} to plan '${planId}' via NOWPayments!`);
+        console.log(`Successfully upgraded user ${userId} to plan '${planId}' via NOWPayments!`);
+      } catch (dbError: any) {
+        console.error("Firestore Update Error in NowPayments Webhook:", dbError);
+        
+        // In local development or simulation mode, if it fails due to credentials, fallback gracefully
+        if (sig === "simulate-payment" || process.env.NODE_ENV === "development") {
+          console.warn("Firestore update failed, but proceeding with simulation response.");
+          return NextResponse.json({
+            received: true,
+            warning: "Firestore update failed locally due to credentials. Proceeding with simulated fallback.",
+            simulatedUpgrade: {
+              plan: planId,
+              generationsLimit: generationsLimit,
+              userId: userId
+            }
+          });
+        }
+        throw dbError; // Rethrow to trigger 500 error in production
+      }
     }
 
     return NextResponse.json({ received: true });

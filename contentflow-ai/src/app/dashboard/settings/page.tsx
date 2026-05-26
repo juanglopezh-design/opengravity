@@ -15,10 +15,34 @@ export default function SettingsPage() {
       if (!user) return;
 
       const docRef = doc(db, "users", user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setUserData(docSnap.data());
+      let data: any = null;
+      try {
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          data = docSnap.data();
+        }
+      } catch (e) {
+        console.warn("Could not fetch user doc from Firestore in settings:", e);
       }
+
+      // Local simulation fallback for dev mode
+      if (process.env.NODE_ENV === "development") {
+        try {
+          const mockUpgradeStr = localStorage.getItem(`contentflow_mock_upgrade_${user.uid}`);
+          if (mockUpgradeStr) {
+            const mockUpgrade = JSON.parse(mockUpgradeStr);
+            data = {
+              ...data,
+              plan: mockUpgrade.plan,
+              generationsLimit: mockUpgrade.generationsLimit,
+            };
+          }
+        } catch (storageError) {
+          console.error("Local storage read error in settings:", storageError);
+        }
+      }
+
+      setUserData(data);
       setLoading(false);
     };
 

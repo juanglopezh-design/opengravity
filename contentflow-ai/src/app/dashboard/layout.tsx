@@ -23,10 +23,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setUser(currentUser);
         // Fetch user plan data
         const docRef = doc(db, "users", currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
+        let data: any = null;
+        try {
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            data = docSnap.data();
+          }
+        } catch (e) {
+          console.warn("Could not fetch user doc from Firestore:", e);
         }
+
+        // Local simulation fallback for dev mode
+        if (process.env.NODE_ENV === "development") {
+          try {
+            const mockUpgradeStr = localStorage.getItem(`contentflow_mock_upgrade_${currentUser.uid}`);
+            if (mockUpgradeStr) {
+              const mockUpgrade = JSON.parse(mockUpgradeStr);
+              data = {
+                ...data,
+                plan: mockUpgrade.plan,
+                generationsLimit: mockUpgrade.generationsLimit,
+              };
+            }
+          } catch (storageError) {
+            console.error("Local storage read error:", storageError);
+          }
+        }
+
+        setUserData(data);
         setLoading(false);
       }
     });
@@ -77,18 +101,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className={styles.planCard}>
           <div className={styles.planHeader}>
             <Sparkles size={16} className={styles.planIcon} />
-            <span>Plan {userData?.plan === "pro" ? "Pro" : userData?.plan === "starter" ? "Starter" : "Free"}</span>
+            <span>Plan {userData?.plan === "pro" ? "Pro" : userData?.plan === "business" ? "Business" : userData?.plan === "starter" ? "Starter" : "Free"}</span>
           </div>
           <div className={styles.usageBar}>
             <div 
               className={styles.usageFill} 
-              style={{ width: `${Math.min(100, ((userData?.generationsUsed || 0) / (userData?.generationsLimit || 10)) * 100)}%` }}
+              style={{ width: `${(userData?.plan === "pro" || userData?.plan === "business") ? 100 : Math.min(100, ((userData?.generationsUsed || 0) / (userData?.generationsLimit || 10)) * 100)}%` }}
             ></div>
           </div>
           <p className={styles.usageText}>
-            {userData?.generationsUsed || 0} / {userData?.plan === "pro" ? "∞" : (userData?.generationsLimit || 10)} generaciones
+            {userData?.generationsUsed || 0} / {(userData?.plan === "pro" || userData?.plan === "business") ? "∞" : (userData?.generationsLimit || 10)} generaciones
           </p>
-          {userData?.plan !== "pro" && (
+          {(userData?.plan !== "pro" && userData?.plan !== "business") && (
             <Link href="/dashboard/settings" className={styles.upgradeBtn}>
               Mejorar plan
             </Link>
