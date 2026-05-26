@@ -16,9 +16,9 @@ export default function Footer() {
               Crea contenido viral en segundos.
             </p>
             <div className={styles.socials}>
-              <a href="#" id="footer-twitter" aria-label="Twitter">𝕏</a>
-              <a href="#" id="footer-instagram" aria-label="Instagram">📸</a>
-              <a href="#" id="footer-linkedin" aria-label="LinkedIn">💼</a>
+              <a href="https://x.com/contentflowai" id="footer-twitter" aria-label="ContentFlow AI en X" target="_blank" rel="noopener noreferrer">𝕏</a>
+              <a href="https://instagram.com/contentflowai" id="footer-instagram" aria-label="ContentFlow AI en Instagram" target="_blank" rel="noopener noreferrer">📸</a>
+              <a href="https://www.linkedin.com/company/contentflow-ai" id="footer-linkedin" aria-label="ContentFlow AI en LinkedIn" target="_blank" rel="noopener noreferrer">💼</a>
             </div>
           </div>
 
@@ -46,7 +46,7 @@ export default function Footer() {
         </div>
 
         <div className={styles.bottom}>
-          <p>© 2025 ContentFlow AI. Todos los derechos reservados.</p>
+          <p>© 2026 ContentFlow AI. Todos los derechos reservados.</p>
           <p>Hecho con ❤️ y potenciado por Gemini AI</p>
         </div>
       </div>

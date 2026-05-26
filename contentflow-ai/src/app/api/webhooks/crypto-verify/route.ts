@@ -2,15 +2,12 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 import * as admin from "firebase-admin";
 
-// Tu dirección de Bitcoin (debe coincidir con la del frontend)
-const YOUR_BTC_WALLET = "bc1qazfthj3utl4m6hc536p0s32q2qteq9aueflj32"; // ← cambia esto
-
-// Número mínimo de confirmaciones para aceptar el pago
-const MIN_CONFIRMATIONS = 1;
+// Dirección Bitcoin oficial de ContentFlow AI. Debe coincidir con el checkout.
+const YOUR_BTC_WALLET = "bc1qazfthj3utl4m6hc536p0s32q2qteq9aueflj32";
 
 export async function POST(req: Request) {
   try {
-    const { txHash, orderId, planId, priceUsd, btcAmount, walletAddress } = await req.json();
+    const { txHash, orderId, planId, btcAmount, walletAddress } = await req.json();
 
     if (!txHash || !orderId || !planId) {
       return NextResponse.json({ error: "Faltan parámetros requeridos." }, { status: 400 });
@@ -147,8 +144,6 @@ export async function POST(req: Request) {
           plan: planId,
           generationsLimit,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          stripeSubscriptionId: null,
-          stripeCustomerId: null,
           btcTxHash: txHash,
           btcPaymentStatus: "confirmed",
           btcVerificationSource: verificationSource,

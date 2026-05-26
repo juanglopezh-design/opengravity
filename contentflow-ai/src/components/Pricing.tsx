@@ -77,7 +77,7 @@ const plans = [
 export default function Pricing() {
   const router = useRouter();
   
-  // Payment States — Crypto directo (sin API route intermedia)
+  // Pagos directos con Bitcoin, sin tarjeta ni pasarelas intermedias.
   const handleSelectPlan = (plan: typeof plans[0]) => {
     if (plan.id === "free") {
       router.push("/signup");
@@ -105,13 +105,13 @@ export default function Pricing() {
     <section className={styles.section} id="pricing">
       <div className="container">
         <div className={styles.header}>
-          <div className="badge">🪙 Criptomonedas</div>
+          <div className="badge">₿ Bitcoin only</div>
           <h2 className={styles.title}>
             Planes simples,{" "}
             <span className="gradient-text">resultados extraordinarios</span>
           </h2>
           <p className={styles.subtitle}>
-            Empieza gratis. Escala cuando estés listo. Pago 100% seguro y anónimo con Cripto.
+            Empieza gratis. Escala cuando estés listo. Los planes de pago se activan solo con Bitcoin.
           </p>
         </div>
 
@@ -157,7 +157,7 @@ export default function Pricing() {
         </div>
 
         <p className={styles.note}>
-          🪙 Activación instantánea con Criptomonedas (USDT, BTC, ETH) &nbsp;•&nbsp; Sin tarjeta de crédito &nbsp;•&nbsp; Cancela cuando quieras
+          ₿ Activación con Bitcoin Mainnet &nbsp;•&nbsp; Sin tarjeta de crédito &nbsp;•&nbsp; Wallet: bc1qazfthj3utl4m6hc536p0s32q2qteq9aueflj32
         </p>
       </div>
     </section>

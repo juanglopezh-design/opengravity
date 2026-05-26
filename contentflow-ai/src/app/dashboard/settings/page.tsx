@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import styles from "./settings.module.css";
-import { User, CreditCard, Sparkles } from "lucide-react";
+import { Bitcoin, Sparkles, User } from "lucide-react";
 
 export default function SettingsPage() {
   const [userData, setUserData] = useState<any>(null);
@@ -49,13 +49,11 @@ export default function SettingsPage() {
     fetchUser();
   }, []);
 
-  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
-
   const handleCheckout = (planId: string) => {
     const user = auth.currentUser;
     if (!user) return;
 
-    // Redirigir directo a la página de pago crypto (sin API route intermedia)
+    // Redirigir directo a la página de pago Bitcoin.
     const orderId = `${user.uid}___${planId}___${Date.now()}`;
     const params = new URLSearchParams({
       order_id: orderId,
@@ -103,8 +101,8 @@ export default function SettingsPage() {
         {/* Subscription Card */}
         <div className={`glass-card ${styles.card}`}>
           <div className={styles.cardHeader}>
-            <CreditCard size={20} className={styles.icon} />
-            <h2>Suscripción</h2>
+            <Bitcoin size={20} className={styles.icon} />
+            <h2>Suscripción Bitcoin</h2>
           </div>
           
           <div className={styles.usageSection}>
@@ -141,7 +139,6 @@ export default function SettingsPage() {
                   <button 
                     onClick={() => handleCheckout("starter")} 
                     className="btn-secondary"
-                    disabled={checkoutLoading !== null}
                     style={{ flex: 1 }}
                   >
                     Plan Starter ($9)
@@ -151,7 +148,6 @@ export default function SettingsPage() {
                   <button 
                     onClick={() => handleCheckout("pro")} 
                     className="btn-secondary"
-                    disabled={checkoutLoading !== null}
                     style={{ flex: 1 }}
                   >
                     Plan Pro ($29)
@@ -160,7 +156,6 @@ export default function SettingsPage() {
                 <button 
                   onClick={() => handleCheckout("business")} 
                   className="btn-primary"
-                  disabled={checkoutLoading !== null}
                   style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
                 >
                   <Sparkles size={16} /> Plan Business ($79)

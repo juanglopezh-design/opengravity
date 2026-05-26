@@ -20,8 +20,10 @@ const eslintConfig = [
   {
     ignores: [
       ".next/**",
+      ".firebase/**",
       "out/**",
       "build/**",
+      "dist/**",
       "next-env.d.ts",
     ],
   },

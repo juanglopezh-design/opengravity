@@ -30,9 +30,5 @@ services:
         value: "939924050941"
       - key: NEXT_PUBLIC_FIREBASE_APP_ID
         value: "1:939924050941:web:0a595064b5ce861401bf94"
-      - key: NOWPAYMENTS_API_KEY
-        value: "mock"
-      - key: NOWPAYMENTS_IPN_SECRET
-        value: "nowpayments_ipn_secret_placeholder"
       - key: FIREBASE_SERVICE_ACCOUNT
         sync: false
