@@ -4,6 +4,17 @@ import { adminDb } from "@/lib/firebase-admin";
 import { btcWalletAddress, planGenerationLimits } from "@/lib/config";
 import * as admin from "firebase-admin";
 
+/** Confirmaciones mínimas para considerar el pago seguro */
+const MIN_CONFIRMATIONS = 3;
+
+interface MempoolTx {
+  status?: {
+    confirmed?: boolean;
+    block_height?: number;
+  };
+  vout?: Array<{ scriptpubkey_address?: string; value?: number }>;
+}
+
 export async function POST(req: Request) {
   try {
     const authResult = await requireAuth(req);
@@ -52,6 +63,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Plan no válido." }, { status: 400 });
     }
 
+    // ── Comprobación de TX duplicada ─────────────────────────────
     try {
       const existingTx = await adminDb
         .collection("users")
@@ -68,27 +80,36 @@ export async function POST(req: Request) {
       console.warn("[CryptoVerify] Duplicate TX check skipped:", indexError);
     }
 
-    let txData: {
-      status?: { confirmed?: boolean };
-      vout?: Array<{ scriptpubkey_address?: string; value?: number }>;
-    } | null = null;
+    // ── Obtención de datos de la TX ──────────────────────────────
+    let txData: MempoolTx | null = null;
     let verificationSource = "none";
+    let currentBlockHeight: number | null = null;
 
+    // Fuente 1: mempool.space
     try {
-      const mempoolRes = await fetch(`https://mempool.space/api/tx/${txHash}`, {
-        headers: { "User-Agent": "ContentFlowAI/1.0" },
-        signal: AbortSignal.timeout(10000),
-      });
+      const [txRes, blockRes] = await Promise.all([
+        fetch(`https://mempool.space/api/tx/${txHash}`, {
+          headers: { "User-Agent": "ContentFlowAI/1.0" },
+          signal: AbortSignal.timeout(10000),
+        }),
+        fetch("https://mempool.space/api/blocks/tip/height", {
+          signal: AbortSignal.timeout(10000),
+        }),
+      ]);
 
-      if (mempoolRes.ok) {
-        txData = await mempoolRes.json();
+      if (txRes.ok) {
+        txData = await txRes.json();
         verificationSource = "mempool.space";
+      }
+      if (blockRes.ok) {
+        currentBlockHeight = Number(await blockRes.text());
       }
     } catch (fetchErr) {
       const message = fetchErr instanceof Error ? fetchErr.message : "fetch failed";
       console.warn("[CryptoVerify] mempool.space fetch failed:", message);
     }
 
+    // Fuente 2: Blockchair (fallback)
     if (!txData) {
       try {
         const blockchairRes = await fetch(
@@ -100,7 +121,7 @@ export async function POST(req: Request) {
           if (blockchairData?.data?.length > 0) {
             const bcTx = blockchairData.data[0].transaction;
             txData = {
-              status: { confirmed: bcTx.block_id > 0 },
+              status: { confirmed: bcTx.block_id > 0, block_height: bcTx.block_id || undefined },
               vout:
                 blockchairData.data[0].outputs?.map(
                   (o: { recipient?: string; value?: number }) => ({
@@ -118,6 +139,7 @@ export async function POST(req: Request) {
       }
     }
 
+    // ── Modo dev ─────────────────────────────────────────────────
     const isDevMode =
       process.env.NODE_ENV === "development" &&
       (txHash.startsWith("test_") || !btcWalletAddress);
@@ -125,7 +147,7 @@ export async function POST(req: Request) {
     if (!txData) {
       if (isDevMode) {
         txData = {
-          status: { confirmed: true },
+          status: { confirmed: true, block_height: 800000 },
           vout: [
             {
               scriptpubkey_address: btcWalletAddress,
@@ -134,6 +156,7 @@ export async function POST(req: Request) {
           ],
         };
         verificationSource = "dev-simulation";
+        currentBlockHeight = 800003;
       } else {
         return NextResponse.json(
           {
@@ -145,7 +168,9 @@ export async function POST(req: Request) {
       }
     }
 
+    // ── Verificación de confirmaciones ───────────────────────────
     const confirmed = txData?.status?.confirmed === true;
+
     if (!confirmed && !isDevMode) {
       return NextResponse.json(
         {
@@ -156,19 +181,33 @@ export async function POST(req: Request) {
       );
     }
 
+    // Verificar número mínimo de confirmaciones
+    if (confirmed && !isDevMode && currentBlockHeight && txData?.status?.block_height) {
+      const confirmations = currentBlockHeight - txData.status.block_height + 1;
+      if (confirmations < MIN_CONFIRMATIONS) {
+        return NextResponse.json(
+          {
+            error: `La transacción solo tiene ${confirmations} confirmación${confirmations === 1 ? "" : "es"}. Necesitamos ${MIN_CONFIRMATIONS} para mayor seguridad. Espera unos minutos más.`,
+            confirmations,
+            required: MIN_CONFIRMATIONS,
+          },
+          { status: 422 }
+        );
+      }
+    }
+
+    // ── Verificar dirección de destino ───────────────────────────
     const outputs = txData?.vout || [];
     const ourOutput = outputs.find((out) => out.scriptpubkey_address === btcWalletAddress);
 
     if (!ourOutput && !isDevMode) {
       return NextResponse.json(
-        {
-          error:
-            "Esta transacción no está dirigida a nuestra dirección de Bitcoin.",
-        },
+        { error: "Esta transacción no está dirigida a nuestra dirección de Bitcoin." },
         { status: 422 }
       );
     }
 
+    // ── Verificar monto ──────────────────────────────────────────
     if (ourOutput && btcAmount) {
       const paidSats = ourOutput.value ?? 0;
       const expectedSats = Math.round(parseFloat(btcAmount) * 1e8);
@@ -183,6 +222,7 @@ export async function POST(req: Request) {
       }
     }
 
+    // ── Activar plan en Firestore ────────────────────────────────
     const generationsLimit = planGenerationLimits[planId] ?? 100;
 
     try {
@@ -190,6 +230,7 @@ export async function POST(req: Request) {
         {
           plan: planId,
           generationsLimit,
+          generationsUsed: 0, // reset al activar un nuevo plan
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           btcTxHash: txHash,
           btcPaymentStatus: "confirmed",

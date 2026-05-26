@@ -24,14 +24,19 @@ function initializeFirebaseAdmin() {
       return;
     }
 
-    console.error(
-      "[Firebase Admin] FIREBASE_SERVICE_ACCOUNT es obligatorio en producción (Render)."
-    );
-    if (projectId) {
-      admin.initializeApp({ projectId });
-    }
+    // En producción sin credenciales: fallo explícito y ruidoso
+    const msg =
+      "[Firebase Admin] FIREBASE_SERVICE_ACCOUNT es OBLIGATORIO en producción. " +
+      "Configura la variable de entorno en Render antes de arrancar.";
+    console.error(msg);
+    throw new Error(msg);
   } catch (error) {
+    // Re-lanzar siempre para que el servidor no arranque mal configurado
+    if (error instanceof Error && error.message.includes("FIREBASE_SERVICE_ACCOUNT")) {
+      throw error;
+    }
     console.error("Firebase Admin Initialization Error:", error);
+    throw error;
   }
 }
 

@@ -3,7 +3,10 @@ import { generateContent } from "@/lib/gemini";
 import { requireAuth } from "@/lib/auth-server";
 import { adminDb } from "@/lib/firebase-admin";
 import { isUnlimitedPlan } from "@/lib/config";
+import { checkRateLimit } from "@/lib/rate-limit";
 import * as admin from "firebase-admin";
+
+const MAX_PROMPT_LENGTH = 2000;
 
 export async function POST(req: Request) {
   try {
@@ -11,6 +14,22 @@ export async function POST(req: Request) {
     if (!authResult.ok) return authResult.response;
     const userId = authResult.uid;
 
+    // ── Rate limiting ──────────────────────────────────────────────
+    const rateLimitResult = checkRateLimit(userId);
+    if (!rateLimitResult.allowed) {
+      const retryAfterSec = Math.ceil(rateLimitResult.retryAfterMs / 1000);
+      return NextResponse.json(
+        {
+          error: `Demasiadas solicitudes. Espera ${retryAfterSec} segundos antes de volver a generar.`,
+        },
+        {
+          status: 429,
+          headers: { "Retry-After": String(retryAfterSec) },
+        }
+      );
+    }
+
+    // ── Parseo y validación de parámetros ─────────────────────────
     const { prompt, type, tone, language } = await req.json();
 
     if (!prompt?.trim() || !type) {
@@ -20,6 +39,16 @@ export async function POST(req: Request) {
       );
     }
 
+    if (prompt.trim().length > MAX_PROMPT_LENGTH) {
+      return NextResponse.json(
+        {
+          error: `El prompt es demasiado largo. Máximo ${MAX_PROMPT_LENGTH} caracteres (actual: ${prompt.trim().length}).`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // ── Datos de usuario ──────────────────────────────────────────
     const userRef = adminDb.collection("users").doc(userId);
     let userData: Record<string, unknown> | undefined;
 
@@ -47,6 +76,7 @@ export async function POST(req: Request) {
     const generationsUsed = Number(userData.generationsUsed ?? 0);
     const generationsLimit = Number(userData.generationsLimit ?? 10);
 
+    // ── Comprobación de límite mensual ────────────────────────────
     if (!isUnlimitedPlan(plan) && generationsUsed >= generationsLimit) {
       return NextResponse.json(
         { error: "Has alcanzado tu límite de generaciones. Mejora tu plan para continuar." },
@@ -54,6 +84,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // ── Generación con Gemini ─────────────────────────────────────
     const generatedText = await generateContent(
       prompt,
       type,
@@ -63,6 +94,7 @@ export async function POST(req: Request) {
 
     const newGenerationsUsed = generationsUsed + 1;
 
+    // ── Persistencia: historial + contador ────────────────────────
     try {
       await Promise.all([
         userRef.collection("history").add({

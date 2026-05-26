@@ -5,7 +5,7 @@ import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getApiUrl } from "@/lib/api-helper";
-import { btcWalletAddress, planGenerationLimits, planPricesUsd } from "@/lib/config";
+import { btcWalletAddress, planPricesUsd } from "@/lib/config";
 import {
   Copy,
   Check,
@@ -138,19 +138,6 @@ function CryptoCheckoutForm() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        if (process.env.NODE_ENV === "development") {
-          const userId = orderId.split("___")[0];
-          if (userId) {
-            localStorage.setItem(
-              `contentflow_mock_upgrade_${userId}`,
-              JSON.stringify({
-                plan: planId,
-                generationsLimit: planGenerationLimits[planId] ?? 100,
-                userId,
-              })
-            );
-          }
-        }
         setStatus("success");
         setTimeout(() => {
           router.push("/dashboard?payment=success&gateway=btc");
@@ -321,36 +308,6 @@ function CryptoCheckoutForm() {
                   Una vez enviado el pago, pega el hash de transacción (TX ID) aquí. Lo verificaremos
                   automáticamente en la blockchain.
                 </p>
-                {process.env.NODE_ENV === "development" && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const randomHex = Array.from({ length: 59 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-                      setTxHash("test_" + randomHex);
-                      setErrorMsg("");
-                    }}
-                    style={{
-                      background: "rgba(168, 85, 247, 0.15)",
-                      border: "1px dashed #a855f7",
-                      color: "#c084fc",
-                      padding: "6px 12px",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "rgba(168, 85, 247, 0.25)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(168, 85, 247, 0.15)";
-                    }}
-                  >
-                    ⚡ Simular Pago (Dev Only)
-                  </button>
-                )}
               </div>
               <div className={styles.txInputRow}>
                 <input
