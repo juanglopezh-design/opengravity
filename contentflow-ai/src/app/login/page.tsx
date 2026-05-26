@@ -35,8 +35,8 @@ function LoginForm() {
 
   const routeAfterAuth = (user: User) => {
     if (redirect === "/pricing" && plan && plan !== "free") {
+      // El checkout genera el orderId con el UID confirmado — no lo pasamos aqui
       const params = new URLSearchParams({
-        order_id: `${user.uid}___${plan}___${Date.now()}`,
         plan_id: plan,
         user_email: user.email || email.trim(),
       });

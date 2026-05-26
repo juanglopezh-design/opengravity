@@ -36,8 +36,8 @@ function SignupForm() {
 
   const routeAfterSignup = (user: User) => {
     if (plan !== "free") {
+      // El checkout genera el orderId con el UID confirmado
       const params = new URLSearchParams({
-        order_id: `${user.uid}___${plan}___${Date.now()}`,
         plan_id: plan,
         user_email: user.email || email.trim(),
       });

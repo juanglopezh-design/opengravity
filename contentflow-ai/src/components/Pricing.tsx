@@ -1,7 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
-import { btcWalletAddress } from "@/lib/config";
 import styles from "./Pricing.module.css";
 
 const plans = [
@@ -77,8 +76,7 @@ const plans = [
 
 export default function Pricing() {
   const router = useRouter();
-  
-  // Pagos directos con Bitcoin, sin tarjeta ni pasarelas intermedias.
+
   const handleSelectPlan = (plan: typeof plans[0]) => {
     if (plan.id === "free") {
       router.push("/signup");
@@ -87,14 +85,15 @@ export default function Pricing() {
 
     const user = auth.currentUser;
     if (!user) {
+      // No logueado: redirigir a login con plan como parámetro
+      // El login construirá el orderId con el UID real tras autenticarse
       router.push(`/login?redirect=/pricing&plan=${plan.id}`);
       return;
     }
 
-    // Generamos el orderId en el cliente para evitar depender del servidor
-    const orderId = `${user.uid}___${plan.id}___${Date.now()}`;
+    // Logueado: ir directo al checkout con plan_id solamente
+    // El checkout genera el orderId con el UID confirmado por Firebase Auth
     const params = new URLSearchParams({
-      order_id: orderId,
       plan_id: plan.id,
       user_email: user.email || "",
     });
@@ -108,8 +107,7 @@ export default function Pricing() {
         <div className={styles.header}>
           <div className="badge">₿ Bitcoin only</div>
           <h2 className={styles.title}>
-            Planes simples,{" "}
-            <span className="gradient-text">resultados extraordinarios</span>
+            Planes simples, resultados extraordinarios
           </h2>
           <p className={styles.subtitle}>
             Empieza gratis. Escala cuando estés listo. Los planes de pago se activan solo con Bitcoin.
@@ -145,21 +143,13 @@ export default function Pricing() {
                 onClick={() => handleSelectPlan(plan)}
                 className={plan.highlight ? "btn-primary" : "btn-secondary"}
                 id={`pricing-cta-${plan.name.toLowerCase()}`}
-                style={{
-                  width: "100%",
-                  justifyContent: "center",
-                  marginTop: "auto",
-                }}
+                style={{ width: "100%", justifyContent: "center" }}
               >
                 {plan.cta}
               </button>
             </div>
           ))}
         </div>
-
-        <p className={styles.note}>
-          ₿ Activación con Bitcoin Mainnet &nbsp;•&nbsp; Sin tarjeta de crédito &nbsp;•&nbsp; Wallet: {btcWalletAddress}
-        </p>
       </div>
     </section>
   );

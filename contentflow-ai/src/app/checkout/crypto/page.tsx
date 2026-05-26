@@ -26,12 +26,14 @@ function CryptoCheckoutForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const orderId = searchParams.get("order_id") || "";
   const planId = searchParams.get("plan_id") || "starter";
-  const userEmail = searchParams.get("user_email") || "";
+  const userEmailParam = searchParams.get("user_email") || "";
   const priceUsd = planPricesUsd[planId] ?? 9;
 
   const [authReady, setAuthReady] = useState(false);
+  // orderId se genera aqui con el UID real confirmado por Firebase
+  const [orderId, setOrderId] = useState("");
+  const [userEmail, setUserEmail] = useState(userEmailParam);
   const [btcRate, setBtcRate] = useState(FALLBACK_BTC_RATE);
   const [copied, setCopied] = useState(false);
   const [txHash, setTxHash] = useState("");
@@ -50,16 +52,14 @@ function CryptoCheckoutForm() {
         router.replace(`/login?redirect=${encodeURIComponent(returnUrl)}`);
         return;
       }
-      const orderUserId = orderId.split("___")[0];
-      if (orderUserId && orderUserId !== user.uid) {
-        setErrorMsg("Este pedido no pertenece a tu cuenta. Vuelve a elegir un plan.");
-        setAuthReady(true);
-        return;
-      }
+      // Generar orderId con el UID real del usuario autenticado
+      const generatedOrderId = `${user.uid}___${planId}___${Date.now()}`;
+      setOrderId(generatedOrderId);
+      setUserEmail(user.email || userEmailParam);
       setAuthReady(true);
     });
     return () => unsubscribe();
-  }, [orderId, router, searchParams]);
+  }, [planId, router, searchParams, userEmailParam]);
 
   // Fetch real BTC price
   useEffect(() => {
