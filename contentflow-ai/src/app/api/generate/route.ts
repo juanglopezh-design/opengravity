@@ -3,35 +3,10 @@ import { generateContent } from "@/lib/gemini";
 import { requireAuth } from "@/lib/auth-server";
 import { adminDb } from "@/lib/firebase-admin";
 import { isUnlimitedPlan } from "@/lib/config";
+import { checkRateLimit } from "@/lib/rate-limit";
 import * as admin from "firebase-admin";
 
-// In-memory rate limiter: max 10 requests per minute per user
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT_MAX = 10;
-const RATE_LIMIT_WINDOW_MS = 60_000;
-
-function checkRateLimit(uid: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(uid);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(uid, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-
-  if (entry.count >= RATE_LIMIT_MAX) return false;
-
-  entry.count += 1;
-  return true;
-}
-
-// Clean up stale entries every 5 minutes to avoid memory leaks
-setInterval(() => {
-  const now = Date.now();
-  for (const [uid, entry] of rateLimitMap.entries()) {
-    if (now > entry.resetAt) rateLimitMap.delete(uid);
-  }
-}, 5 * 60_000);
+const MAX_PROMPT_LENGTH = 2000;
 
 export async function POST(req: Request) {
   try {
@@ -39,30 +14,37 @@ export async function POST(req: Request) {
     if (!authResult.ok) return authResult.response;
     const userId = authResult.uid;
 
-    // Rate limiting
-    if (!checkRateLimit(userId)) {
+    // ── Rate limiting ──────────────────────────────────────────────
+    const rateLimitResult = checkRateLimit(userId);
+    if (!rateLimitResult.allowed) {
+      const retryAfterSec = Math.ceil(rateLimitResult.retryAfterMs / 1000);
       return NextResponse.json(
-        { error: "Demasiadas solicitudes. Espera un minuto antes de volver a intentar." },
-        { status: 429 }
+        { error: `Demasiadas solicitudes. Espera ${retryAfterSec} segundos antes de volver a generar.` },
+        { status: 429, headers: { "Retry-After": String(retryAfterSec) } }
       );
     }
 
-    const body = await req.json();
-    const { prompt, type, tone, language } = body;
+    // ── Parseo y validación de parámetros ─────────────────────────
+    const { prompt, type, tone, language } = await req.json();
 
     if (!prompt?.trim() || !type) {
+      return NextResponse.json({ error: "Faltan parámetros requeridos" }, { status: 400 });
+    }
+
+    if (prompt.trim().length > MAX_PROMPT_LENGTH) {
       return NextResponse.json(
-        { error: "Faltan parámetros requeridos" },
+        { error: `El prompt es demasiado largo. Máximo ${MAX_PROMPT_LENGTH} caracteres (actual: ${prompt.trim().length}).` },
         { status: 400 }
       );
     }
 
-    // Sanitize inputs — truncate to reasonable limits
-    const sanitizedPrompt = String(prompt).trim().slice(0, 2000);
+    // Sanitize inputs — truncate and cast to string to prevent injection
+    const sanitizedPrompt = String(prompt).trim().slice(0, MAX_PROMPT_LENGTH);
     const sanitizedType = String(type).trim().slice(0, 100);
     const sanitizedTone = String(tone || "Profesional").trim().slice(0, 50);
     const sanitizedLanguage = String(language || "Español").trim().slice(0, 50);
 
+    // ── Datos de usuario ──────────────────────────────────────────
     const userRef = adminDb.collection("users").doc(userId);
     let userData: Record<string, unknown> | undefined;
 
@@ -72,11 +54,7 @@ export async function POST(req: Request) {
     } catch (dbError) {
       console.error("Firestore Admin error in generate route:", dbError);
       if (process.env.NODE_ENV === "development") {
-        userData = {
-          plan: "free",
-          generationsLimit: 10,
-          generationsUsed: 0,
-        };
+        userData = { plan: "free", generationsLimit: 10, generationsUsed: 0 };
       } else {
         return NextResponse.json({ error: "Error de base de datos" }, { status: 500 });
       }
@@ -90,6 +68,7 @@ export async function POST(req: Request) {
     const generationsUsed = Number(userData.generationsUsed ?? 0);
     const generationsLimit = Number(userData.generationsLimit ?? 10);
 
+    // ── Comprobación de límite mensual ────────────────────────────
     if (!isUnlimitedPlan(plan) && generationsUsed >= generationsLimit) {
       return NextResponse.json(
         { error: "Has alcanzado tu límite de generaciones. Mejora tu plan para continuar." },
@@ -97,6 +76,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // ── Generación con Gemini ─────────────────────────────────────
     const generatedText = await generateContent(
       sanitizedPrompt,
       sanitizedType,
@@ -106,6 +86,7 @@ export async function POST(req: Request) {
 
     const newGenerationsUsed = generationsUsed + 1;
 
+    // ── Persistencia: historial + contador ────────────────────────
     try {
       await Promise.all([
         userRef.collection("history").add({
@@ -132,8 +113,7 @@ export async function POST(req: Request) {
       plan,
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Error interno del servidor";
+    const message = error instanceof Error ? error.message : "Error interno del servidor";
     console.error("API Error:", error);
     return NextResponse.json({ error: message }, { status: 500 });
   }

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getApiUrl } from "@/lib/api-helper";
-import { btcWalletAddress, planGenerationLimits, planPricesUsd } from "@/lib/config";
+import { btcWalletAddress, planPricesUsd } from "@/lib/config";
 import {
   Copy,
   Check,
@@ -26,12 +26,14 @@ function CryptoCheckoutForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const orderId = searchParams.get("order_id") || "";
   const planId = searchParams.get("plan_id") || "starter";
-  const userEmail = searchParams.get("user_email") || "";
+  const userEmailParam = searchParams.get("user_email") || "";
   const priceUsd = planPricesUsd[planId] ?? 9;
 
   const [authReady, setAuthReady] = useState(false);
+  // orderId se genera aqui con el UID real confirmado por Firebase
+  const [orderId, setOrderId] = useState("");
+  const [userEmail, setUserEmail] = useState(userEmailParam);
   const [btcRate, setBtcRate] = useState(FALLBACK_BTC_RATE);
   const [copied, setCopied] = useState(false);
   const [txHash, setTxHash] = useState("");
@@ -50,16 +52,14 @@ function CryptoCheckoutForm() {
         router.replace(`/login?redirect=${encodeURIComponent(returnUrl)}`);
         return;
       }
-      const orderUserId = orderId.split("___")[0];
-      if (orderUserId && orderUserId !== user.uid) {
-        setErrorMsg("Este pedido no pertenece a tu cuenta. Vuelve a elegir un plan.");
-        setAuthReady(true);
-        return;
-      }
+      // Generar orderId con el UID real del usuario autenticado
+      const generatedOrderId = `${user.uid}___${planId}___${Date.now()}`;
+      setOrderId(generatedOrderId);
+      setUserEmail(user.email || userEmailParam);
       setAuthReady(true);
     });
     return () => unsubscribe();
-  }, [orderId, router, searchParams]);
+  }, [planId, router, searchParams, userEmailParam]);
 
   // Fetch real BTC price
   useEffect(() => {
@@ -138,19 +138,6 @@ function CryptoCheckoutForm() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        if (process.env.NODE_ENV === "development") {
-          const userId = orderId.split("___")[0];
-          if (userId) {
-            localStorage.setItem(
-              `contentflow_mock_upgrade_${userId}`,
-              JSON.stringify({
-                plan: planId,
-                generationsLimit: planGenerationLimits[planId] ?? 100,
-                userId,
-              })
-            );
-          }
-        }
         setStatus("success");
         setTimeout(() => {
           router.push("/dashboard?payment=success&gateway=btc");
@@ -321,36 +308,6 @@ function CryptoCheckoutForm() {
                   Una vez enviado el pago, pega el hash de transacción (TX ID) aquí. Lo verificaremos
                   automáticamente en la blockchain.
                 </p>
-                {process.env.NODE_ENV === "development" && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const randomHex = Array.from({ length: 59 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-                      setTxHash("test_" + randomHex);
-                      setErrorMsg("");
-                    }}
-                    style={{
-                      background: "rgba(168, 85, 247, 0.15)",
-                      border: "1px dashed #a855f7",
-                      color: "#c084fc",
-                      padding: "6px 12px",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "rgba(168, 85, 247, 0.25)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(168, 85, 247, 0.15)";
-                    }}
-                  >
-                    ⚡ Simular Pago (Dev Only)
-                  </button>
-                )}
               </div>
               <div className={styles.txInputRow}>
                 <input

@@ -47,22 +47,6 @@ export function UserDataProvider({
       console.warn("Could not fetch user doc from Firestore:", e);
     }
 
-    if (process.env.NODE_ENV === "development") {
-      try {
-        const mockUpgradeStr = localStorage.getItem(`contentflow_mock_upgrade_${uid}`);
-        if (mockUpgradeStr) {
-          const mockUpgrade = JSON.parse(mockUpgradeStr);
-          data = {
-            ...data,
-            plan: mockUpgrade.plan,
-            generationsLimit: mockUpgrade.generationsLimit,
-          };
-        }
-      } catch {
-        /* ignore */
-      }
-    }
-
     setUserData(data);
   }, []);
 

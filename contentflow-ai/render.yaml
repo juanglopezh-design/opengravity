@@ -3,7 +3,8 @@ services:
     name: contentflow-ai
     runtime: node
     plan: free
-    buildCommand: npm ci && npm run build
+    rootDir: contentflow-ai
+    buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
