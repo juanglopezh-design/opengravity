@@ -38,7 +38,7 @@ export default function Footer() {
             </div>
             <div className={styles.col}>
               <h4>Soporte</h4>
-              <a href="mailto:hola@contentflowai.com">Contacto</a>
+              <a href="mailto:juanglopezh@gmail.com">Contacto</a>
               <Link href="/help">Ayuda</Link>
               <Link href="/status">Estado</Link>
             </div>

@@ -24,7 +24,16 @@ export default function HelpPage() {
 
         <section className={styles.section}>
           <h2>Cómo empezar</h2>
-          <p>Crea una cuenta gratis, entra al dashboard, elige el tipo de contenido, describe tu idea y genera una primera versión en segundos.</p>
+          <p>
+            Elige el plan Basic ($1.99/mes) para comenzar con 25 generaciones al mes.
+            Crea tu cuenta, activa el plan con Bitcoin y entra al dashboard.
+            Desde ahí elige el tipo de contenido, describe tu idea y genera tu primera versión en segundos.
+          </p>
+          <p style={{ marginTop: "12px" }}>
+            <Link href="/signup" style={{ color: "var(--accent-purple)", fontWeight: 600 }}>
+              → Crear cuenta y empezar
+            </Link>
+          </p>
         </section>
 
         <section className={styles.section}>
@@ -34,12 +43,19 @@ export default function HelpPage() {
 
         <section className={styles.section}>
           <h2>Pagos y planes</h2>
-          <p>Los planes Starter, Pro y Business se activan después de verificar el pago. Si tu pago no aparece reflejado, escribe a soporte con el email de tu cuenta.</p>
+          <p>
+            Todos los planes (Basic, Starter, Pro y Business) se activan con Bitcoin después de verificar la transacción en la blockchain.
+            Si tu pago no aparece reflejado en los próximos 30 minutos, escríbenos a soporte con el TX ID de tu transacción.
+          </p>
         </section>
 
         <section className={styles.section}>
           <h2>Contacto</h2>
-          <p>Para soporte directo, escríbenos a <a href="mailto:hola@contentflowai.com">hola@contentflowai.com</a>. Incluye tu email de cuenta y una descripción breve del problema.</p>
+          <p>
+            Para soporte directo, escríbenos a{" "}
+            <a href="mailto:juanglopezh@gmail.com">juanglopezh@gmail.com</a>.
+            Incluye tu email de cuenta y una descripción breve del problema.
+          </p>
         </section>
       </article>
     </main>
