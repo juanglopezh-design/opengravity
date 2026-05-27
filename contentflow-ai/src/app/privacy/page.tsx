@@ -44,7 +44,7 @@ export default function PrivacyPage() {
 
         <section className={styles.section}>
           <h2>Tus derechos</h2>
-          <p>Puedes solicitar acceso, corrección o eliminación de tus datos escribiendo a <a href="mailto:hola@contentflowai.com">hola@contentflowai.com</a>.</p>
+          <p>Puedes solicitar acceso, corrección o eliminación de tus datos escribiendo a <a href="mailto:juanglopezh@gmail.com">juanglopezh@gmail.com</a>.</p>
         </section>
       </article>
     </main>

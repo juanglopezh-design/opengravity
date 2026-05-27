@@ -4,6 +4,14 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 const ALLOWED_TONES = ["Profesional", "Inspirador", "Humorístico", "Directo", "Conversacional"];
 const ALLOWED_LANGUAGES = ["Español", "Inglés", "Portugués", "Francés"];
+const ALLOWED_TYPES = [
+  "Post de LinkedIn (Profesional)",
+  "Hilo de Twitter/X (Enganchador)",
+  "Caption de Instagram (Lifestyle)",
+  "Email de Ventas (Conversión)",
+  "Newsletter (Informativo)",
+  "Idea para Video de YouTube/TikTok",
+];
 
 export async function generateContent(
   prompt: string,
@@ -18,6 +26,7 @@ export async function generateContent(
   // Validate tone and language against allowed values to prevent prompt injection
   const safeTone = ALLOWED_TONES.includes(tone) ? tone : "Profesional";
   const safeLanguage = ALLOWED_LANGUAGES.includes(language) ? language : "Español";
+  const safeType = ALLOWED_TYPES.includes(type) ? type : "Contenido general";
 
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
@@ -29,7 +38,7 @@ export async function generateContent(
 
   const systemPrompt = `Eres un experto copywriter y creador de contenido de clase mundial.
 Tu objetivo es generar contenido de alta conversión y máximo engagement.
-Tipo de contenido solicitado: ${type}
+Tipo de contenido solicitado: ${safeType}
 Tono deseado: ${safeTone}
 Idioma: ${safeLanguage}
 

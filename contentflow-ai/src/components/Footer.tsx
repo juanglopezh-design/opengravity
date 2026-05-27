@@ -45,7 +45,7 @@ export default function Footer() {
         </div>
 
         <div className={styles.bottom}>
-          <p>© 2026 ContentFlow AI. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} ContentFlow AI. Todos los derechos reservados.</p>
           <p>Hecho con ❤️ y potenciado por Gemini AI</p>
         </div>
       </div>

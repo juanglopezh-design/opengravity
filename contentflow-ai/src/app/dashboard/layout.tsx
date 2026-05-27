@@ -82,7 +82,9 @@ function DashboardShell({ user, children }: { user: User; children: React.ReactN
                     ? "Starter"
                     : userData?.plan === "basic"
                       ? "Basic"
-                      : "Basic"}
+                      : userData?.plan === "pending" || !userData?.plan
+                        ? "Sin plan"
+                        : "Basic"}
             </span>
           </div>
           <div className={styles.usageBar}>
@@ -132,7 +134,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         router.push("/login");
       } else {
         // Refresh auth hint cookie so middleware keeps protecting routes
-        document.cookie = "cf_auth=1; path=/; max-age=3600; SameSite=Strict";
+        document.cookie = "cf_auth=1; path=/; max-age=86400; SameSite=Strict; Secure";
         setUser(currentUser);
         setLoading(false);
       }

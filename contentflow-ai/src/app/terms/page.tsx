@@ -44,7 +44,7 @@ export default function TermsPage() {
 
         <section className={styles.section}>
           <h2>Contacto</h2>
-          <p>Para dudas sobre estos términos, escríbenos a <a href="mailto:hola@contentflowai.com">hola@contentflowai.com</a>.</p>
+          <p>Para dudas sobre estos términos, escríbenos a <a href="mailto:juanglopezh@gmail.com">juanglopezh@gmail.com</a>.</p>
         </section>
       </article>
     </main>

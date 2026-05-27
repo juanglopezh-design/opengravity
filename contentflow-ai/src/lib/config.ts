@@ -34,8 +34,7 @@ export function getAllowedOrigins(): string[] {
     "http://localhost:3000",
     "https://contentflow-ai-juang26.web.app",
     "https://contentflow-ai-juang26.firebaseapp.com",
-    "https://contentflow-ai-ex6w.onrender.com",
-    "https://contentflow-ai.onrender.com",
+    "https://contentflow-ai-9wy7.onrender.com",
   ];
   const fromEnv = (process.env.ALLOWED_ORIGINS || "")
     .split(",")

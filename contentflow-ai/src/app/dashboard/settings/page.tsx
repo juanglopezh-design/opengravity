@@ -11,6 +11,7 @@ export default function SettingsPage() {
   const [userData, setUserData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
   const [orderLoading, setOrderLoading] = useState<string | null>(null);
+  const [orderError, setOrderError] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -54,6 +55,7 @@ export default function SettingsPage() {
     if (!user) return;
 
     setOrderLoading(planId);
+    setOrderError("");
     try {
       const token = await user.getIdToken();
       const res = await fetch("/api/checkout/create-order", {
@@ -64,7 +66,7 @@ export default function SettingsPage() {
       const data = await res.json();
 
       if (!res.ok || !data.orderId) {
-        console.error("[Settings] create-order error:", data.error);
+        setOrderError(data.error || "No se pudo crear la orden. Inténtalo de nuevo.");
         return;
       }
 
@@ -76,6 +78,7 @@ export default function SettingsPage() {
       window.location.href = `/checkout/crypto?${params.toString()}`;
     } catch (err) {
       console.error("[Settings] Error creating order:", err);
+      setOrderError("Error de red. Inténtalo de nuevo.");
     } finally {
       setOrderLoading(null);
     }
@@ -156,6 +159,12 @@ export default function SettingsPage() {
             <div className={styles.upgradeSection}>
               <h3>Mejora tu plan</h3>
               <p>Obtén generaciones ilimitadas, agentes autónomos y más herramientas elite.</p>
+
+          {orderError && (
+            <div style={{ color: "#ef4444", fontSize: "13px", marginTop: "8px", display: "flex", alignItems: "center", gap: "6px" }}>
+              ⚠️ {orderError}
+            </div>
+          )}
 
               <div className={styles.plans}>
                 {(plan === "basic") && (

@@ -34,8 +34,8 @@ function SignupForm() {
   };
 
   const routeAfterSignup = async (user: User) => {
-    // Set a lightweight auth hint cookie so the middleware can guard protected routes
-    document.cookie = "cf_auth=1; path=/; max-age=3600; SameSite=Strict";
+    // Set a lightweight auth hint cookie — Secure flag added for HTTPS
+    document.cookie = "cf_auth=1; path=/; max-age=86400; SameSite=Strict; Secure";
 
     // All plans require payment — always go through checkout
     try {

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth-server";
 import { adminDb } from "@/lib/firebase-admin";
 import { btcWalletAddress, planGenerationLimits, planPricesUsd } from "@/lib/config";
-import { sendPaymentNotification } from "@/lib/email";
+import { sendPaymentNotification, sendUserPaymentConfirmation } from "@/lib/email";
 import * as admin from "firebase-admin";
 
 /** Confirmaciones mínimas para considerar el pago seguro */
@@ -242,17 +242,15 @@ export async function POST(req: Request) {
 
       console.log(`[CryptoVerify] Plan '${planId}' activado para ${userId} (TX ${txHash}, ${verificationSource})`);
 
-      // Send payment notification email to owner (non-blocking)
+      // Send emails (non-blocking)
       const userDoc = await adminDb.collection("users").doc(userId).get();
       const userEmail = userDoc.data()?.email as string | undefined;
-      sendPaymentNotification({
-        userEmail,
-        userId,
-        planId,
-        priceUsd: planPricesUsd[planId] ?? 0,
-        txHash,
-        verificationSource,
-      });
+
+      sendPaymentNotification({ userEmail, userId, planId, priceUsd: planPricesUsd[planId] ?? 0, txHash, verificationSource });
+
+      if (userEmail) {
+        sendUserPaymentConfirmation({ userEmail, planId, txHash });
+      }
     } catch (dbError) {
       console.error("[CryptoVerify] Firestore error:", dbError);
       if (isDevMode) {

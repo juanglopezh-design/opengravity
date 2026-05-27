@@ -34,8 +34,8 @@ function LoginForm() {
   };
 
   const routeAfterAuth = async (user: User) => {
-    // Set a lightweight auth hint cookie so the middleware can guard protected routes
-    document.cookie = "cf_auth=1; path=/; max-age=3600; SameSite=Strict";
+    // Set a lightweight auth hint cookie — Secure flag added for HTTPS
+    document.cookie = "cf_auth=1; path=/; max-age=86400; SameSite=Strict; Secure";
 
     if (redirect === "/pricing" && plan && plan !== "basic") {
       try {
@@ -177,7 +177,10 @@ function LoginForm() {
 
         <p className={styles.switchLink}>
           ¿No tienes cuenta?{" "}
-          <Link href="/signup">Regístrate gratis</Link>
+          <Link href="/signup">Regístrate</Link>
+        </p>
+        <p className={styles.switchLink}>
+          <Link href="/forgot-password">¿Olvidaste tu contraseña?</Link>
         </p>
       </div>
     </div>
