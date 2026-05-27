@@ -1,5 +1,5 @@
 /** URLs y constantes compartidas (cliente + servidor). */
-const DEFAULT_RENDER_URL = "https://contentflow-ai-ex6w.onrender.com";
+const DEFAULT_RENDER_URL = "https://contentflow-ai-9wy7.onrender.com";
 
 export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || DEFAULT_RENDER_URL;
