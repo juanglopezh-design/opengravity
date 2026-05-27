@@ -28,7 +28,6 @@ export default function Footer() {
               <Link href="#features">Características</Link>
               <Link href="#pricing">Precios</Link>
               <Link href="#testimonials">Testimonios</Link>
-              <Link href="/dashboard">Dashboard</Link>
             </div>
             <div className={styles.col}>
               <h4>Legal</h4>
