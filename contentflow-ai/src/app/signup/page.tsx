@@ -108,7 +108,7 @@ function SignupForm() {
         </Link>
 
         <div className={styles.header}>
-          <h1 className={styles.title}>Crea tu cuenta gratis</h1>
+          <h1 className={styles.title}>Crea tu cuenta</h1>
           <p className={styles.subtitle}>
             {plan === "pro" ? "Plan Pro - Generaciones ilimitadas" :
              plan === "starter" ? "Plan Starter - 100 generaciones/mes" :
@@ -177,7 +177,7 @@ function SignupForm() {
           {error && <div className={styles.error} role="alert" aria-live="polite">{error}</div>}
 
           <button id="signup-submit-btn" type="submit" className="btn-primary" style={{ width: "100%", justifyContent: "center" }} disabled={loading}>
-            {loading ? "Creando cuenta..." : "Crear cuenta gratis"}
+            {loading ? "Creando cuenta..." : "Crear cuenta"}
           </button>
         </form>
 
