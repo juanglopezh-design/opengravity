@@ -25,7 +25,7 @@ export default function Navbar() {
             Iniciar sesión
           </Link>
           <Link href="/signup" className="btn-primary" style={{ padding: "10px 20px", fontSize: "14px" }}>
-            Empezar gratis
+            Empezar
           </Link>
         </div>
 

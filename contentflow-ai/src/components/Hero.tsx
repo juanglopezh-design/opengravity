@@ -39,19 +39,16 @@ export default function Hero() {
 
   return (
     <section className={styles.hero}>
-      {/* Background orbs */}
       <div className={`orb orb-purple ${styles.orb1}`} />
       <div className={`orb orb-blue ${styles.orb2}`} />
 
       <div className="container">
         <div className={styles.content}>
-          {/* Badge */}
           <div className={`badge fade-in-up ${styles.badge}`} style={{ animationDelay: "0.1s" }}>
             <span>✨</span>
             Potenciado por Gemini AI
           </div>
 
-          {/* Headline */}
           <h1 className={`${styles.headline} fade-in-up`} style={{ animationDelay: "0.2s" }}>
             Genera contenido{" "}
             <span className="gradient-text">viral</span>
@@ -65,10 +62,9 @@ export default function Hero() {
             Sin bloqueo creativo. Sin horas de trabajo. Sin límites.
           </p>
 
-          {/* CTA buttons */}
           <div className={`${styles.ctas} fade-in-up`} style={{ animationDelay: "0.4s" }}>
             <Link href="/signup" className="btn-primary" id="hero-cta-primary" style={{ fontSize: "16px", padding: "14px 32px" }}>
-              Empieza gratis ahora
+              Empezar ahora
               <span>→</span>
             </Link>
             <Link href="#features" className="btn-secondary" id="hero-cta-secondary" style={{ fontSize: "16px", padding: "14px 32px" }}>
@@ -76,9 +72,8 @@ export default function Hero() {
             </Link>
           </div>
 
-          <p className={styles.note}>✓ Sin tarjeta de crédito &nbsp;✓ 10 generaciones gratis &nbsp;✓ Cancela cuando quieras</p>
+          <p className={styles.note}>✓ Desde $1.99/mes &nbsp;✓ Pago con Bitcoin &nbsp;✓ Sin tarjeta de crédito</p>
 
-          {/* Live demo card */}
           <div className={`glass-card ${styles.demoCard} fade-in-up float-anim`} style={{ animationDelay: "0.5s" }}>
             <div className={styles.demoHeader}>
               <div className={styles.dots}>
@@ -100,7 +95,6 @@ export default function Hero() {
               </p>
             </div>
 
-            {/* Stats row */}
             <div className={styles.statsRow}>
               {[
                 { value: "10s", label: "Tiempo generación" },
