@@ -3,9 +3,8 @@ services:
     name: contentflow-ai
     runtime: node
     plan: free
-    rootDir: contentflow-ai
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: cd contentflow-ai && npm install && npm run build
+    startCommand: cd contentflow-ai && npm start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
