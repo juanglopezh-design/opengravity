@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="100%" style="stop-color:#0f0f1a"/>
+    </linearGradient>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.1"/>
+    </linearGradient>
+    <filter id="blur1">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+    <filter id="blur2">
+      <feGaussianBlur stdDeviation="30"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="400" fill="url(#bg)" rx="20"/>
+
+  <!-- Glow orbs -->
+  <circle cx="150" cy="150" r="180" fill="#8b5cf6" opacity="0.12" filter="url(#blur1)"/>
+  <circle cx="650" cy="280" r="150" fill="#3b82f6" opacity="0.12" filter="url(#blur2)"/>
+
+  <!-- Border -->
+  <rect width="800" height="400" fill="none" stroke="url(#grad1)" stroke-width="1.5" rx="20" opacity="0.4"/>
+
+  <!-- Lightning bolt icon -->
+  <g transform="translate(80, 120)">
+    <polygon points="45,0 20,55 38,55 15,110 60,40 40,40 60,0" fill="url(#grad1)" opacity="0.95"/>
+  </g>
+
+  <!-- ContentFlow AI text -->
+  <text x="160" y="175" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="800" fill="url(#grad1)" letter-spacing="-1">ContentFlow</text>
+  <text x="160" y="230" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="800" fill="#f1f5f9" letter-spacing="-1">AI</text>
+
+  <!-- Tagline -->
+  <text x="160" y="275" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#94a3b8" letter-spacing="0.5">Genera contenido viral con IA en 10 segundos</text>
+
+  <!-- Divider line -->
+  <line x1="160" y1="300" x2="640" y2="300" stroke="url(#grad1)" stroke-width="1" opacity="0.3"/>
+
+  <!-- URL -->
+  <text x="160" y="335" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#8b5cf6" letter-spacing="1" font-weight="600">contentflow-ai-9wy7.onrender.com</text>
+
+  <!-- Badge -->
+  <rect x="160" y="350" width="130" height="28" rx="14" fill="url(#grad1)" opacity="0.15"/>
+  <rect x="160" y="350" width="130" height="28" rx="14" fill="none" stroke="url(#grad1)" stroke-width="1" opacity="0.4"/>
+  <text x="225" y="369" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#a78bfa" text-anchor="middle" font-weight="600">₿ Bitcoin Payments</text>
+
+  <!-- Powered by Gemini badge -->
+  <rect x="305" y="350" width="150" height="28" rx="14" fill="url(#grad1)" opacity="0.15"/>
+  <rect x="305" y="350" width="150" height="28" rx="14" fill="none" stroke="url(#grad1)" stroke-width="1" opacity="0.4"/>
+  <text x="380" y="369" font-family="system-ui, -apple-system, sans-serif" font-size="12" fill="#60a5fa" text-anchor="middle" font-weight="600">✨ Powered by Gemini AI</text>
+</svg>

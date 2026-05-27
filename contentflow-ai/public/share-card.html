@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ContentFlow AI — Tarjeta de presentación</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #050508;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 24px;
+    }
+    .card {
+      background: linear-gradient(135deg, #0f0f1a, #0a0a0f);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 24px;
+      padding: 48px;
+      max-width: 900px;
+      width: 100%;
+      display: flex;
+      gap: 48px;
+      align-items: center;
+      box-shadow: 0 0 80px rgba(139,92,246,0.15), 0 0 40px rgba(59,130,246,0.1);
+    }
+    .left { flex: 1; }
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .bolt {
+      font-size: 48px;
+      line-height: 1;
+    }
+    .brand {
+      font-size: 42px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+    .tagline {
+      font-size: 18px;
+      color: #94a3b8;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .url {
+      font-size: 15px;
+      color: #8b5cf6;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 24px;
+      padding: 10px 16px;
+      background: rgba(139,92,246,0.1);
+      border: 1px solid rgba(139,92,246,0.25);
+      border-radius: 8px;
+      display: inline-block;
+    }
+    .badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(139,92,246,0.3);
+      color: #a78bfa;
+      background: rgba(139,92,246,0.08);
+    }
+    .badge.blue {
+      border-color: rgba(59,130,246,0.3);
+      color: #60a5fa;
+      background: rgba(59,130,246,0.08);
+    }
+    .right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .qr-wrap {
+      background: #0a0a0f;
+      border: 2px solid rgba(139,92,246,0.4);
+      border-radius: 16px;
+      padding: 16px;
+      width: 200px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-wrap img, .qr-wrap svg {
+      width: 168px;
+      height: 168px;
+    }
+    .scan-text {
+      font-size: 13px;
+      color: #64748b;
+      text-align: center;
+    }
+    .print-btn {
+      margin-top: 32px;
+      text-align: center;
+    }
+    .print-btn button {
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .card { box-shadow: none; border-color: #e2e8f0; }
+      .print-btn { display: none; }
+      .brand { -webkit-text-fill-color: #8b5cf6; }
+    }
+    @media (max-width: 600px) {
+      .card { flex-direction: column; padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="card">
+      <div class="left">
+        <div class="logo-row">
+          <span class="bolt">⚡</span>
+          <span class="brand">ContentFlow AI</span>
+        </div>
+        <p class="tagline">
+          Genera posts, emails y blogs listos<br/>
+          para publicar en <strong style="color:#f1f5f9">10 segundos</strong> con IA.
+        </p>
+        <div class="url">🌐 contentflow-ai-9wy7.onrender.com</div>
+        <div class="badges">
+          <span class="badge">₿ Bitcoin Payments</span>
+          <span class="badge blue">✨ Gemini AI</span>
+          <span class="badge">🚀 Desde $1.99/mes</span>
+          <span class="badge blue">50+ tipos de contenido</span>
+        </div>
+      </div>
+      <div class="right">
+        <div class="qr-wrap">
+          <img src="/qr-contentflow.svg" alt="QR ContentFlow AI" width="168" height="168"/>
+        </div>
+        <p class="scan-text">Escanea para abrir la app</p>
+      </div>
+    </div>
+    <div class="print-btn">
+      <button onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
+    </div>
+  </div>
+</body>
+</html>
