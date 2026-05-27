@@ -25,9 +25,9 @@ function SignupForm() {
       await setDoc(userRef, {
         name: displayName,
         email: userEmail,
-        plan: "basic",
+        plan: "pending",       // no active plan until payment confirmed
         generationsUsed: 0,
-        generationsLimit: 25,
+        generationsLimit: 0,   // zero until paid
         createdAt: serverTimestamp(),
       });
     }

@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 import { Copy, Check, Sparkles, RefreshCw } from "lucide-react";
 import { getApiUrl } from "@/lib/api-helper";
 import { useUserData } from "./UserDataContext";
+import Link from "next/link";
 
 const contentTypes = [
   "Post de LinkedIn (Profesional)",
@@ -19,7 +20,7 @@ const tones = ["Profesional", "Inspirador", "Humorístico", "Directo", "Conversa
 const languages = ["Español", "Inglés", "Portugués", "Francés"];
 
 export default function Dashboard() {
-  const { applyUsageFromServer, refreshUserData } = useUserData();
+  const { applyUsageFromServer, refreshUserData, userData } = useUserData();
   const [prompt, setPrompt] = useState("");
   const [type, setType] = useState(contentTypes[0]);
   const [tone, setTone] = useState(tones[0]);
@@ -81,6 +82,29 @@ export default function Dashboard() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  // Block access if no active plan
+  if (userData !== null && (!userData?.plan || userData?.plan === "pending")) {
+    return (
+      <div className={styles.page}>
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "center",
+          justifyContent: "center", minHeight: "60vh", textAlign: "center", gap: "20px"
+        }}>
+          <Sparkles size={56} style={{ color: "var(--accent-purple)", opacity: 0.8 }} />
+          <h2 style={{ fontSize: "24px", fontWeight: 700 }}>Activa tu plan para empezar</h2>
+          <p style={{ color: "var(--text-secondary)", maxWidth: "400px" }}>
+            Necesitas un plan activo para usar el generador de contenido.
+            Desde $1.99/mes con Bitcoin.
+          </p>
+          <Link href="/dashboard/settings" className="btn-primary" style={{ padding: "14px 32px", fontSize: "16px" }}>
+            <Sparkles size={18} />
+            Ver planes y activar
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>

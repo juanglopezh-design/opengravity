@@ -64,9 +64,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
     }
 
-    const plan = typeof userData.plan === "string" ? userData.plan : "free";
+    const plan = typeof userData.plan === "string" ? userData.plan : "pending";
     const generationsUsed = Number(userData.generationsUsed ?? 0);
-    const generationsLimit = Number(userData.generationsLimit ?? 10);
+    const generationsLimit = Number(userData.generationsLimit ?? 0);
+
+    // Block users without an active paid plan
+    if (!plan || plan === "pending") {
+      return NextResponse.json(
+        { error: "Necesitas un plan activo para generar contenido. Activa tu plan desde Configuración." },
+        { status: 403 }
+      );
+    }
 
     // ── Comprobación de límite mensual ────────────────────────────
     if (!isUnlimitedPlan(plan) && generationsUsed >= generationsLimit) {
