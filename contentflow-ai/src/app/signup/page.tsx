@@ -113,7 +113,7 @@ function SignupForm() {
             {plan === "pro" ? "Plan Pro - Generaciones ilimitadas" :
              plan === "starter" ? "Plan Starter - 100 generaciones/mes" :
              plan === "business" ? "Plan Business - Automatización avanzada" :
-             "Plan Basic - 25 generaciones/mes por $1.99"}
+             "Plan Basic - 10 generaciones/mes por $1.99"}
           </p>
         </div>
 

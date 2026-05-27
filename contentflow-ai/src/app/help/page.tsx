@@ -45,7 +45,7 @@ export default function HelpPage() {
           <h2>Pagos y planes</h2>
           <p>Todos los planes se activan con Bitcoin después de verificar la transacción en la blockchain:</p>
           <ul style={{ marginTop: "12px", paddingLeft: "20px", lineHeight: "2" }}>
-            <li><strong>Basic</strong> — $1.99/mes · 25 generaciones</li>
+            <li><strong>Basic</strong> — $1.99/mes · 10 generaciones</li>
             <li><strong>Starter</strong> — $9/mes · 100 generaciones</li>
             <li><strong>Pro</strong> — $29/mes · Generaciones ilimitadas</li>
             <li><strong>Business</strong> — $79/mes · Todo Pro + agentes autónomos</li>

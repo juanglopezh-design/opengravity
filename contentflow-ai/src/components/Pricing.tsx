@@ -12,7 +12,7 @@ const plans = [
     price: "$1.99",
     period: "/mes",
     desc: "Para empezar a crear contenido",
-    features: ["25 generaciones por mes", "5 tipos de contenido", "1 idioma", "Historial básico"],
+    features: ["10 generaciones por mes", "5 tipos de contenido", "1 idioma", "Historial básico"],
     cta: "Empezar con Basic",
     highlight: false,
   },

@@ -21,7 +21,7 @@ export const planPricesUsd: Record<string, number> = {
 };
 
 export const planGenerationLimits: Record<string, number> = {
-  basic: 25,
+  basic: 10,
   starter: 100,
   pro: 999999,
   business: 999999,
