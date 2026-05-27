@@ -80,7 +80,9 @@ function DashboardShell({ user, children }: { user: User; children: React.ReactN
                   ? "Business"
                   : userData?.plan === "starter"
                     ? "Starter"
-                    : "Free"}
+                    : userData?.plan === "basic"
+                      ? "Basic"
+                      : "Basic"}
             </span>
           </div>
           <div className={styles.usageBar}>
@@ -88,7 +90,7 @@ function DashboardShell({ user, children }: { user: User; children: React.ReactN
           </div>
           <p className={styles.usageText}>
             {userData?.generationsUsed || 0} /{" "}
-            {isUnlimitedPlan(userData?.plan) ? "∞" : userData?.generationsLimit || 10}{" "}
+            {isUnlimitedPlan(userData?.plan) ? "∞" : userData?.generationsLimit || 25}{" "}
             generaciones
           </p>
           {!isUnlimitedPlan(userData?.plan) && (

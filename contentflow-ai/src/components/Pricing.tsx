@@ -7,13 +7,13 @@ import styles from "./Pricing.module.css";
 
 const plans = [
   {
-    name: "Free",
-    id: "free",
-    price: "$0",
-    period: "/siempre",
-    desc: "Para probar y enamorarte",
-    features: ["10 generaciones por mes", "5 tipos de contenido", "1 idioma", "Historial básico"],
-    cta: "Empezar gratis",
+    name: "Basic",
+    id: "basic",
+    price: "$1.99",
+    period: "/mes",
+    desc: "Para empezar a crear contenido",
+    features: ["25 generaciones por mes", "5 tipos de contenido", "1 idioma", "Historial básico"],
+    cta: "Empezar con Basic",
     highlight: false,
   },
   {
@@ -54,11 +54,6 @@ export default function Pricing() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   const handleSelectPlan = async (plan: (typeof plans)[0]) => {
-    if (plan.id === "free") {
-      router.push("/signup");
-      return;
-    }
-
     const user = auth.currentUser;
     if (!user) {
       router.push(`/login?redirect=/pricing&plan=${plan.id}`);
@@ -103,7 +98,7 @@ export default function Pricing() {
             <span className="gradient-text">resultados extraordinarios</span>
           </h2>
           <p className={styles.subtitle}>
-            Empieza gratis. Escala cuando estés listo. Los planes de pago se activan solo con Bitcoin.
+            Todos los planes se activan con Bitcoin. Sin tarjeta de crédito.
           </p>
         </div>
 

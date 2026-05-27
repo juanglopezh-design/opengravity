@@ -11,7 +11,7 @@ import styles from "../login/auth.module.css";
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const plan = searchParams.get("plan") || "free";
+  const plan = searchParams.get("plan") || "basic";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,9 +25,9 @@ function SignupForm() {
       await setDoc(userRef, {
         name: displayName,
         email: userEmail,
-        plan: "free",
+        plan: "basic",
         generationsUsed: 0,
-        generationsLimit: 10,
+        generationsLimit: 25,
         createdAt: serverTimestamp(),
       });
     }
@@ -37,8 +37,8 @@ function SignupForm() {
     // Set a lightweight auth hint cookie so the middleware can guard protected routes
     document.cookie = "cf_auth=1; path=/; max-age=3600; SameSite=Strict";
 
-    if (plan !== "free") {
-      try {
+    // All plans require payment — always go through checkout
+    try {
         const token = await user.getIdToken();
         const res = await fetch("/api/checkout/create-order", {
           method: "POST",
@@ -58,7 +58,6 @@ function SignupForm() {
       } catch {
         // Fall through to dashboard on error
       }
-    }
 
     router.push("/dashboard");
   };
@@ -114,7 +113,7 @@ function SignupForm() {
             {plan === "pro" ? "Plan Pro - Generaciones ilimitadas" :
              plan === "starter" ? "Plan Starter - 100 generaciones/mes" :
              plan === "business" ? "Plan Business - Automatización avanzada" :
-             "10 generaciones gratis, sin tarjeta de crédito"}
+             "Plan Basic - 25 generaciones/mes por $1.99"}
           </p>
         </div>
 

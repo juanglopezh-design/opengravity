@@ -84,9 +84,9 @@ export default function SettingsPage() {
   if (loading) return <div className={styles.loading}>Cargando configuración...</div>;
 
   const currentUser = auth.currentUser;
-  const plan = (userData?.plan as string) || "free";
+  const plan = (userData?.plan as string) || "basic";
   const generationsUsed = Number(userData?.generationsUsed ?? 0);
-  const generationsLimit = Number(userData?.generationsLimit ?? 10);
+  const generationsLimit = Number(userData?.generationsLimit ?? 25);
 
   return (
     <div className={styles.page}>
@@ -158,7 +158,7 @@ export default function SettingsPage() {
               <p>Obtén generaciones ilimitadas, agentes autónomos y más herramientas elite.</p>
 
               <div className={styles.plans}>
-                {plan === "free" && (
+                {(plan === "basic") && (
                   <button
                     onClick={() => handleCheckout("starter")}
                     className="btn-secondary"
@@ -168,7 +168,7 @@ export default function SettingsPage() {
                     {orderLoading === "starter" ? "Preparando..." : "Plan Starter ($9)"}
                   </button>
                 )}
-                {(plan === "free" || plan === "starter") && (
+                {(plan === "basic" || plan === "starter") && (
                   <button
                     onClick={() => handleCheckout("pro")}
                     className="btn-secondary"

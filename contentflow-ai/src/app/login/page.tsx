@@ -25,9 +25,9 @@ function LoginForm() {
       await setDoc(userRef, {
         name: user.displayName || "Usuario",
         email: user.email || "",
-        plan: "free",
+        plan: "basic",
         generationsUsed: 0,
-        generationsLimit: 10,
+        generationsLimit: 25,
         createdAt: serverTimestamp(),
       });
     }
@@ -37,7 +37,7 @@ function LoginForm() {
     // Set a lightweight auth hint cookie so the middleware can guard protected routes
     document.cookie = "cf_auth=1; path=/; max-age=3600; SameSite=Strict";
 
-    if (redirect === "/pricing" && plan && plan !== "free") {
+    if (redirect === "/pricing" && plan && plan !== "basic") {
       try {
         const token = await user.getIdToken();
         const res = await fetch("/api/checkout/create-order", {

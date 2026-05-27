@@ -14,13 +14,14 @@ export const btcWalletAddress =
   "bc1qazfthj3utl4m6hc536p0s32q2qteq9aueflj32";
 
 export const planPricesUsd: Record<string, number> = {
+  basic: 1.99,
   starter: 9,
   pro: 29,
   business: 79,
 };
 
 export const planGenerationLimits: Record<string, number> = {
-  free: 10,
+  basic: 25,
   starter: 100,
   pro: 999999,
   business: 999999,

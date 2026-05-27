@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     } catch (dbError) {
       console.error("Firestore Admin error in generate route:", dbError);
       if (process.env.NODE_ENV === "development") {
-        userData = { plan: "free", generationsLimit: 10, generationsUsed: 0 };
+        userData = { plan: "basic", generationsLimit: 25, generationsUsed: 0 };
       } else {
         return NextResponse.json({ error: "Error de base de datos" }, { status: 500 });
       }

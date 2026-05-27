@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     }
 
     if (planId === "free") {
-      return NextResponse.json({ error: "El plan free no requiere pago." }, { status: 400 });
+      return NextResponse.json({ error: "El plan free no existe. Elige un plan de pago." }, { status: 400 });
     }
 
     if (!planGenerationLimits[planId]) {
