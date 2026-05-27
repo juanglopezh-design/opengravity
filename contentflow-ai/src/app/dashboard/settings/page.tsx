@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import styles from "./settings.module.css";
@@ -7,20 +8,23 @@ import { Bitcoin, Sparkles, User } from "lucide-react";
 import { isUnlimitedPlan } from "@/lib/config";
 
 export default function SettingsPage() {
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [orderLoading, setOrderLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
-      const docRef = doc(db, "users", user.uid);
-      let data: any = null;
+      let data: Record<string, unknown> | null = null;
       try {
+        const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          data = docSnap.data();
+          data = docSnap.data() as Record<string, unknown>;
         }
       } catch (e) {
         console.warn("Could not fetch user doc from Firestore in settings:", e);
@@ -45,27 +49,50 @@ export default function SettingsPage() {
 
       setUserData(data);
       setLoading(false);
-    };
+    });
 
-    fetchUser();
+    return () => unsubscribe();
   }, []);
 
-  const handleCheckout = (planId: string) => {
+  const handleCheckout = async (planId: string) => {
     const user = auth.currentUser;
     if (!user) return;
 
-    // Redirigir directo a la página de pago Bitcoin.
-    const orderId = `${user.uid}___${planId}___${Date.now()}`;
-    const params = new URLSearchParams({
-      order_id: orderId,
-      plan_id: planId,
-      user_email: user.email || "",
-    });
+    setOrderLoading(planId);
+    try {
+      // Create the order server-side — orderId is never generated on the client
+      const token = await user.getIdToken();
+      const res = await fetch("/api/checkout/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ planId }),
+      });
+      const data = await res.json();
 
-    window.location.href = `/checkout/crypto?${params.toString()}`;
+      if (!res.ok || !data.orderId) {
+        console.error("[Settings] create-order error:", data.error);
+        return;
+      }
+
+      const params = new URLSearchParams({
+        order_id: data.orderId,
+        plan_id: data.planId,
+        user_email: user.email || "",
+      });
+      window.location.href = `/checkout/crypto?${params.toString()}`;
+    } catch (err) {
+      console.error("[Settings] Error creating order:", err);
+    } finally {
+      setOrderLoading(null);
+    }
   };
 
   if (loading) return <div className={styles.loading}>Cargando configuración...</div>;
+
+  const currentUser = auth.currentUser;
+  const plan = (userData?.plan as string) || "free";
+  const generationsUsed = Number(userData?.generationsUsed ?? 0);
+  const generationsLimit = Number(userData?.generationsLimit ?? 10);
 
   return (
     <div className={styles.page}>
@@ -84,16 +111,20 @@ export default function SettingsPage() {
           <div className={styles.infoList}>
             <div className={styles.infoItem}>
               <span className={styles.label}>Nombre</span>
-              <span className={styles.value}>{userData?.name || auth.currentUser?.displayName}</span>
+              <span className={styles.value}>
+                {(userData?.name as string) || currentUser?.displayName || "—"}
+              </span>
             </div>
             <div className={styles.infoItem}>
               <span className={styles.label}>Email</span>
-              <span className={styles.value}>{userData?.email || auth.currentUser?.email}</span>
+              <span className={styles.value}>
+                {(userData?.email as string) || currentUser?.email || "—"}
+              </span>
             </div>
             <div className={styles.infoItem}>
               <span className={styles.label}>Plan Actual</span>
               <span className={styles.valueBadge} style={{ textTransform: "capitalize" }}>
-                {userData?.plan || "free"}
+                {plan}
               </span>
             </div>
           </div>
@@ -105,69 +136,75 @@ export default function SettingsPage() {
             <Bitcoin size={20} className={styles.icon} />
             <h2>Suscripción Bitcoin</h2>
           </div>
-          
+
           <div className={styles.usageSection}>
             <div className={styles.usageHeader}>
               <span>Uso mensual</span>
               <span>
-                {userData?.generationsUsed || 0} /{" "}
-                {isUnlimitedPlan(userData?.plan)
-                  ? "∞"
-                  : userData?.generationsLimit || 10}
+                {generationsUsed} /{" "}
+                {isUnlimitedPlan(plan) ? "∞" : generationsLimit}
               </span>
             </div>
             <div className={styles.usageBar}>
-              <div 
-                className={styles.usageFill} 
-                style={{ 
+              <div
+                className={styles.usageFill}
+                style={{
                   width: `${
-                    isUnlimitedPlan(userData?.plan)
+                    isUnlimitedPlan(plan)
                       ? 100
-                      : Math.min(100, ((userData?.generationsUsed || 0) / (userData?.generationsLimit || 10)) * 100)
-                  }%` 
+                      : Math.min(100, (generationsUsed / generationsLimit) * 100)
+                  }%`,
                 }}
               ></div>
             </div>
           </div>
 
-          {userData?.plan !== "business" && (
+          {plan !== "business" && (
             <div className={styles.upgradeSection}>
               <h3>Mejora tu plan</h3>
               <p>Obtén generaciones ilimitadas, agentes autónomos y más herramientas elite.</p>
-              
+
               <div className={styles.plans}>
-                {userData?.plan === "free" && (
-                  <button 
-                    onClick={() => handleCheckout("starter")} 
+                {plan === "free" && (
+                  <button
+                    onClick={() => handleCheckout("starter")}
                     className="btn-secondary"
+                    disabled={orderLoading === "starter"}
                     style={{ flex: 1 }}
                   >
-                    Plan Starter ($9)
+                    {orderLoading === "starter" ? "Preparando..." : "Plan Starter ($9)"}
                   </button>
                 )}
-                {(userData?.plan === "free" || userData?.plan === "starter") && (
-                  <button 
-                    onClick={() => handleCheckout("pro")} 
+                {(plan === "free" || plan === "starter") && (
+                  <button
+                    onClick={() => handleCheckout("pro")}
                     className="btn-secondary"
+                    disabled={orderLoading === "pro"}
                     style={{ flex: 1 }}
                   >
-                    Plan Pro ($29)
+                    {orderLoading === "pro" ? "Preparando..." : "Plan Pro ($29)"}
                   </button>
                 )}
-                <button 
-                  onClick={() => handleCheckout("business")} 
+                <button
+                  onClick={() => handleCheckout("business")}
                   className="btn-primary"
-                  style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}
+                  disabled={orderLoading === "business"}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                  }}
                 >
-                  <Sparkles size={16} /> Plan Business ($79)
+                  <Sparkles size={16} />
+                  {orderLoading === "business" ? "Preparando..." : "Plan Business ($79)"}
                 </button>
               </div>
             </div>
           )}
         </div>
       </div>
-
-
     </div>
   );
 }

@@ -5,13 +5,50 @@ import { adminDb } from "@/lib/firebase-admin";
 import { isUnlimitedPlan } from "@/lib/config";
 import * as admin from "firebase-admin";
 
+// In-memory rate limiter: max 10 requests per minute per user
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
+function checkRateLimit(uid: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(uid);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(uid, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) return false;
+
+  entry.count += 1;
+  return true;
+}
+
+// Clean up stale entries every 5 minutes to avoid memory leaks
+setInterval(() => {
+  const now = Date.now();
+  for (const [uid, entry] of rateLimitMap.entries()) {
+    if (now > entry.resetAt) rateLimitMap.delete(uid);
+  }
+}, 5 * 60_000);
+
 export async function POST(req: Request) {
   try {
     const authResult = await requireAuth(req);
     if (!authResult.ok) return authResult.response;
     const userId = authResult.uid;
 
-    const { prompt, type, tone, language } = await req.json();
+    // Rate limiting
+    if (!checkRateLimit(userId)) {
+      return NextResponse.json(
+        { error: "Demasiadas solicitudes. Espera un minuto antes de volver a intentar." },
+        { status: 429 }
+      );
+    }
+
+    const body = await req.json();
+    const { prompt, type, tone, language } = body;
 
     if (!prompt?.trim() || !type) {
       return NextResponse.json(
@@ -19,6 +56,12 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    // Sanitize inputs — truncate to reasonable limits
+    const sanitizedPrompt = String(prompt).trim().slice(0, 2000);
+    const sanitizedType = String(type).trim().slice(0, 100);
+    const sanitizedTone = String(tone || "Profesional").trim().slice(0, 50);
+    const sanitizedLanguage = String(language || "Español").trim().slice(0, 50);
 
     const userRef = adminDb.collection("users").doc(userId);
     let userData: Record<string, unknown> | undefined;
@@ -55,10 +98,10 @@ export async function POST(req: Request) {
     }
 
     const generatedText = await generateContent(
-      prompt,
-      type,
-      tone || "Profesional",
-      language || "Español"
+      sanitizedPrompt,
+      sanitizedType,
+      sanitizedTone,
+      sanitizedLanguage
     );
 
     const newGenerationsUsed = generationsUsed + 1;
@@ -66,8 +109,8 @@ export async function POST(req: Request) {
     try {
       await Promise.all([
         userRef.collection("history").add({
-          prompt,
-          type,
+          prompt: sanitizedPrompt,
+          type: sanitizedType,
           content: generatedText,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         }),

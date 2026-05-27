@@ -125,8 +125,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (!currentUser) {
+        // Clear auth hint cookie on logout
+        document.cookie = "cf_auth=; path=/; max-age=0; SameSite=Strict";
         router.push("/login");
       } else {
+        // Refresh auth hint cookie so middleware keeps protecting routes
+        document.cookie = "cf_auth=1; path=/; max-age=3600; SameSite=Strict";
         setUser(currentUser);
         setLoading(false);
       }

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { format } from "date-fns";
@@ -7,15 +8,26 @@ import { es } from "date-fns/locale";
 import styles from "./history.module.css";
 import { History as HistoryIcon, Copy, Check } from "lucide-react";
 
+type HistoryItem = {
+  id: string;
+  type?: string;
+  prompt?: string;
+  content?: string;
+  createdAt?: { toDate: () => Date };
+};
+
 export default function HistoryPage() {
-  const [history, setHistory] = useState<any[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+    // Use onAuthStateChanged instead of auth.currentUser to avoid race conditions
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       try {
         const q = query(
@@ -23,16 +35,19 @@ export default function HistoryPage() {
           orderBy("createdAt", "desc")
         );
         const snapshot = await getDocs(q);
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as HistoryItem[];
         setHistory(data);
       } catch (error) {
         console.error("Error fetching history:", error);
       } finally {
         setLoading(false);
       }
-    };
+    });
 
-    fetchHistory();
+    return () => unsubscribe();
   }, []);
 
   const copyToClipboard = (id: string, text: string) => {
@@ -64,23 +79,28 @@ export default function HistoryPage() {
                 <div>
                   <span className={styles.type}>{item.type}</span>
                   <span className={styles.date}>
-                    {item.createdAt?.toDate ? format(item.createdAt.toDate(), "dd MMM yyyy, HH:mm", { locale: es }) : "Reciente"}
+                    {item.createdAt?.toDate
+                      ? format(item.createdAt.toDate(), "dd MMM yyyy, HH:mm", { locale: es })
+                      : "Reciente"}
                   </span>
                 </div>
-                <button 
-                  onClick={() => copyToClipboard(item.id, item.content)}
+                <button
+                  onClick={() => copyToClipboard(item.id, item.content || "")}
                   className={styles.copyBtn}
                   title="Copiar contenido"
+                  aria-label="Copiar contenido al portapapeles"
                 >
-                  {copiedId === item.id ? <Check size={16} color="#10b981" /> : <Copy size={16} />}
+                  {copiedId === item.id ? (
+                    <Check size={16} color="#10b981" />
+                  ) : (
+                    <Copy size={16} />
+                  )}
                 </button>
               </div>
               <div className={styles.prompt}>
                 <strong>Prompt:</strong> {item.prompt}
               </div>
-              <div className={styles.content}>
-                {item.content}
-              </div>
+              <div className={styles.content}>{item.content}</div>
             </div>
           ))}
         </div>

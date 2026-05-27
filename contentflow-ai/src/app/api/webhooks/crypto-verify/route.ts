@@ -22,18 +22,26 @@ export async function POST(req: Request) {
       );
     }
 
+    // Validate wallet address sent by client matches server config
     if (walletAddress && walletAddress !== btcWalletAddress) {
       console.warn("[CryptoVerify] Wallet address mismatch:", walletAddress);
+      return NextResponse.json(
+        { error: "Dirección de wallet no válida." },
+        { status: 400 }
+      );
     }
 
+    // Parse and validate orderId — must be server-generated format
     const parts = orderId.split("___");
-    if (parts.length < 2) {
+    if (parts.length < 3) {
       return NextResponse.json({ error: "Formato de order_id inválido." }, { status: 400 });
     }
 
     const userId = parts[0];
     const orderPlanId = parts[1];
+    const orderTimestamp = Number(parts[2]);
 
+    // Verify the authenticated user owns this order
     if (userId !== authResult.uid) {
       return NextResponse.json(
         { error: "Este pedido no pertenece a tu cuenta." },
@@ -41,6 +49,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // Verify planId matches what's encoded in the orderId (prevents plan substitution)
     if (orderPlanId !== planId) {
       return NextResponse.json(
         { error: "El plan del pedido no coincide." },
@@ -48,10 +57,20 @@ export async function POST(req: Request) {
       );
     }
 
+    // Reject orders older than 2 hours
+    const orderAgeMs = Date.now() - orderTimestamp;
+    if (orderAgeMs > 2 * 60 * 60 * 1000) {
+      return NextResponse.json(
+        { error: "Este pedido ha expirado. Por favor, inicia un nuevo proceso de pago." },
+        { status: 410 }
+      );
+    }
+
     if (!planGenerationLimits[planId] && planId !== "free") {
       return NextResponse.json({ error: "Plan no válido." }, { status: 400 });
     }
 
+    // Check for duplicate transaction
     try {
       const existingTx = await adminDb
         .collection("users")
@@ -74,6 +93,7 @@ export async function POST(req: Request) {
     } | null = null;
     let verificationSource = "none";
 
+    // Primary: mempool.space
     try {
       const mempoolRes = await fetch(`https://mempool.space/api/tx/${txHash}`, {
         headers: { "User-Agent": "ContentFlowAI/1.0" },
@@ -89,6 +109,7 @@ export async function POST(req: Request) {
       console.warn("[CryptoVerify] mempool.space fetch failed:", message);
     }
 
+    // Fallback: blockchair
     if (!txData) {
       try {
         const blockchairRes = await fetch(

@@ -33,15 +33,33 @@ function LoginForm() {
     }
   };
 
-  const routeAfterAuth = (user: User) => {
+  const routeAfterAuth = async (user: User) => {
+    // Set a lightweight auth hint cookie so the middleware can guard protected routes
+    // without a full token verification on every navigation.
+    document.cookie = "cf_auth=1; path=/; max-age=3600; SameSite=Strict";
+
     if (redirect === "/pricing" && plan && plan !== "free") {
-      const params = new URLSearchParams({
-        order_id: `${user.uid}___${plan}___${Date.now()}`,
-        plan_id: plan,
-        user_email: user.email || email.trim(),
-      });
-      router.push(`/checkout/crypto?${params.toString()}`);
-      return;
+      // Create the order server-side so the orderId is never client-generated
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch("/api/checkout/create-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ planId: plan }),
+        });
+        const data = await res.json();
+        if (res.ok && data.orderId) {
+          const params = new URLSearchParams({
+            order_id: data.orderId,
+            plan_id: data.planId,
+            user_email: user.email || email.trim(),
+          });
+          router.push(`/checkout/crypto?${params.toString()}`);
+          return;
+        }
+      } catch {
+        // Fall through to dashboard on error
+      }
     }
 
     if (redirect?.startsWith("/") && !redirect.startsWith("//") && redirect !== "/login") {
@@ -58,7 +76,7 @@ function LoginForm() {
     setLoading(true);
     try {
       const { user } = await signInWithEmailAndPassword(auth, email.trim(), password);
-      routeAfterAuth(user);
+      await routeAfterAuth(user);
     } catch (err) {
       setError(getAuthErrorMessage(err, "No pudimos iniciar sesión. Revisa tus datos e inténtalo de nuevo."));
     } finally {
@@ -74,7 +92,7 @@ function LoginForm() {
       provider.setCustomParameters({ prompt: "select_account" });
       const { user } = await signInWithPopup(auth, provider);
       await ensureUserDoc(user);
-      routeAfterAuth(user);
+      await routeAfterAuth(user);
     } catch (err) {
       setError(getAuthErrorMessage(err, "No pudimos iniciar sesión con Google. Inténtalo de nuevo."));
     } finally {

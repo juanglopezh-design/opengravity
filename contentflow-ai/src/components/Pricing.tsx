@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { auth } from "@/lib/firebase";
 import { btcWalletAddress } from "@/lib/config";
 import styles from "./Pricing.module.css";
@@ -77,9 +78,9 @@ const plans = [
 
 export default function Pricing() {
   const router = useRouter();
-  
-  // Pagos directos con Bitcoin, sin tarjeta ni pasarelas intermedias.
-  const handleSelectPlan = (plan: typeof plans[0]) => {
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleSelectPlan = async (plan: (typeof plans)[0]) => {
     if (plan.id === "free") {
       router.push("/signup");
       return;
@@ -91,15 +92,33 @@ export default function Pricing() {
       return;
     }
 
-    // Generamos el orderId en el cliente para evitar depender del servidor
-    const orderId = `${user.uid}___${plan.id}___${Date.now()}`;
-    const params = new URLSearchParams({
-      order_id: orderId,
-      plan_id: plan.id,
-      user_email: user.email || "",
-    });
+    setLoadingPlan(plan.id);
+    try {
+      // Create the order server-side — orderId is never generated on the client
+      const token = await user.getIdToken();
+      const res = await fetch("/api/checkout/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ planId: plan.id }),
+      });
+      const data = await res.json();
 
-    router.push(`/checkout/crypto?${params.toString()}`);
+      if (!res.ok || !data.orderId) {
+        console.error("[Pricing] create-order error:", data.error);
+        return;
+      }
+
+      const params = new URLSearchParams({
+        order_id: data.orderId,
+        plan_id: data.planId,
+        user_email: user.email || "",
+      });
+      router.push(`/checkout/crypto?${params.toString()}`);
+    } catch (err) {
+      console.error("[Pricing] Error creating order:", err);
+    } finally {
+      setLoadingPlan(null);
+    }
   };
 
   return (
@@ -122,9 +141,7 @@ export default function Pricing() {
               key={plan.name}
               className={`${styles.card} ${plan.highlight ? styles.highlighted : ""}`}
             >
-              {plan.badge && (
-                <div className={styles.badge}>{plan.badge}</div>
-              )}
+              {plan.badge && <div className={styles.badge}>{plan.badge}</div>}
               <div className={styles.planHeader}>
                 <h3 className={styles.planName}>{plan.name}</h3>
                 <p className={styles.planDesc}>{plan.desc}</p>
@@ -145,20 +162,22 @@ export default function Pricing() {
                 onClick={() => handleSelectPlan(plan)}
                 className={plan.highlight ? "btn-primary" : "btn-secondary"}
                 id={`pricing-cta-${plan.name.toLowerCase()}`}
+                disabled={loadingPlan === plan.id}
                 style={{
                   width: "100%",
                   justifyContent: "center",
                   marginTop: "auto",
                 }}
               >
-                {plan.cta}
+                {loadingPlan === plan.id ? "Preparando..." : plan.cta}
               </button>
             </div>
           ))}
         </div>
 
         <p className={styles.note}>
-          ₿ Activación con Bitcoin Mainnet &nbsp;•&nbsp; Sin tarjeta de crédito &nbsp;•&nbsp; Wallet: {btcWalletAddress}
+          ₿ Activación con Bitcoin Mainnet &nbsp;•&nbsp; Sin tarjeta de crédito &nbsp;•&nbsp;
+          Wallet: {btcWalletAddress}
         </p>
       </div>
     </section>

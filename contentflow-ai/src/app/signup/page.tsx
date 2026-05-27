@@ -34,15 +34,32 @@ function SignupForm() {
     }
   };
 
-  const routeAfterSignup = (user: User) => {
+  const routeAfterSignup = async (user: User) => {
+    // Set a lightweight auth hint cookie so the middleware can guard protected routes
+    document.cookie = "cf_auth=1; path=/; max-age=3600; SameSite=Strict";
+
     if (plan !== "free") {
-      const params = new URLSearchParams({
-        order_id: `${user.uid}___${plan}___${Date.now()}`,
-        plan_id: plan,
-        user_email: user.email || email.trim(),
-      });
-      router.push(`/checkout/crypto?${params.toString()}`);
-      return;
+      // Create the order server-side so the orderId is never client-generated
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch("/api/checkout/create-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ planId: plan }),
+        });
+        const data = await res.json();
+        if (res.ok && data.orderId) {
+          const params = new URLSearchParams({
+            order_id: data.orderId,
+            plan_id: data.planId,
+            user_email: user.email || email.trim(),
+          });
+          router.push(`/checkout/crypto?${params.toString()}`);
+          return;
+        }
+      } catch {
+        // Fall through to dashboard on error
+      }
     }
 
     router.push("/dashboard");
@@ -58,7 +75,7 @@ function SignupForm() {
       const { user } = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
       await updateProfile(user, { displayName: trimmedName });
       await createUserDoc(user.uid, trimmedName, trimmedEmail);
-      routeAfterSignup(user);
+      await routeAfterSignup(user);
     } catch (err) {
       setError(getAuthErrorMessage(err, "No pudimos crear la cuenta. Inténtalo de nuevo en unos minutos."));
     } finally {
@@ -74,7 +91,7 @@ function SignupForm() {
       provider.setCustomParameters({ prompt: "select_account" });
       const { user } = await signInWithPopup(auth, provider);
       await createUserDoc(user.uid, user.displayName || "Usuario", user.email || "");
-      routeAfterSignup(user);
+      await routeAfterSignup(user);
     } catch (err) {
       setError(getAuthErrorMessage(err, "No pudimos registrarte con Google. Inténtalo de nuevo."));
     } finally {

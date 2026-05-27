@@ -6,32 +6,44 @@ function initializeFirebaseAdmin() {
   const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT;
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
+  if (!projectId) {
+    console.error("[Firebase Admin] NEXT_PUBLIC_FIREBASE_PROJECT_ID is not set.");
+  }
+
   try {
     if (serviceAccountJson) {
       const serviceAccount = JSON.parse(serviceAccountJson) as admin.ServiceAccount;
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        projectId: serviceAccount.projectId || projectId,
+        projectId: (serviceAccount as Record<string, string>).project_id || projectId,
       });
+      console.log("[Firebase Admin] Initialized with service account.");
       return;
     }
 
     if (process.env.NODE_ENV === "development" && projectId) {
       console.warn(
-        "[Firebase Admin] Sin FIREBASE_SERVICE_ACCOUNT — modo desarrollo con projectId únicamente."
+        "[Firebase Admin] No FIREBASE_SERVICE_ACCOUNT found — running in development mode with projectId only. " +
+          "Firestore writes and token verification will fail without a valid service account."
       );
       admin.initializeApp({ projectId });
       return;
     }
 
+    // Production without service account — this will cause runtime errors
     console.error(
-      "[Firebase Admin] FIREBASE_SERVICE_ACCOUNT es obligatorio en producción (Render)."
+      "[Firebase Admin] FIREBASE_SERVICE_ACCOUNT is required in production. " +
+        "Set it as an environment variable in your hosting provider (Render, etc.)."
     );
     if (projectId) {
       admin.initializeApp({ projectId });
     }
   } catch (error) {
-    console.error("Firebase Admin Initialization Error:", error);
+    console.error("[Firebase Admin] Initialization error:", error);
+    // Attempt minimal init so the app doesn't crash on import
+    if (projectId && !admin.apps.length) {
+      admin.initializeApp({ projectId });
+    }
   }
 }
 
