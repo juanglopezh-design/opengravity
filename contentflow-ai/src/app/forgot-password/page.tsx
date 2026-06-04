@@ -5,12 +5,14 @@ import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import styles from "../login/auth.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ function ForgotPasswordForm() {
       await sendPasswordResetEmail(auth, email.trim());
       setSent(true);
     } catch (err) {
-      setError(getAuthErrorMessage(err, "No pudimos enviar el email. Verifica la dirección e inténtalo de nuevo."));
+      setError(getAuthErrorMessage(err, t("forgot.error") || "No pudimos enviar el email. Verifica la dirección e inténtalo de nuevo."));
     } finally {
       setLoading(false);
     }
@@ -38,9 +40,9 @@ function ForgotPasswordForm() {
         </Link>
 
         <div className={styles.header}>
-          <h1 className={styles.title}>Recuperar contraseña</h1>
+          <h1 className={styles.title}>{t("forgot.title")}</h1>
           <p className={styles.subtitle}>
-            Te enviaremos un enlace para restablecer tu contraseña.
+            {t("forgot.subtitle")}
           </p>
         </div>
 
@@ -48,19 +50,19 @@ function ForgotPasswordForm() {
           <div style={{ textAlign: "center", padding: "24px 0" }}>
             <div style={{ fontSize: "48px", marginBottom: "16px" }}>📧</div>
             <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "8px" }}>
-              ¡Email enviado!
+              {t("forgot.success")}
             </h2>
             <p style={{ color: "var(--text-secondary)", marginBottom: "24px" }}>
-              Revisa tu bandeja de entrada en <strong>{email}</strong> y sigue el enlace para restablecer tu contraseña.
+              {email}
             </p>
             <Link href="/login" className="btn-primary" style={{ display: "inline-flex", justifyContent: "center" }}>
-              Volver al inicio de sesión
+              {t("forgot.backToLogin")}
             </Link>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.field}>
-              <label htmlFor="reset-email">Email de tu cuenta</label>
+              <label htmlFor="reset-email">{t("auth.email")}</label>
               <input
                 id="reset-email"
                 name="email"
@@ -86,13 +88,13 @@ function ForgotPasswordForm() {
               style={{ width: "100%", justifyContent: "center" }}
               disabled={loading}
             >
-              {loading ? "Enviando..." : "Enviar enlace de recuperación"}
+              {loading ? t("forgot.submitting") : t("forgot.submit")}
             </button>
           </form>
         )}
 
         <p className={styles.switchLink}>
-          <Link href="/login">← Volver al inicio de sesión</Link>
+          <Link href="/login">← {t("forgot.backToLogin")}</Link>
         </p>
       </div>
     </div>
@@ -106,3 +108,4 @@ export default function ForgotPasswordPage() {
     </Suspense>
   );
 }
+

@@ -2,21 +2,18 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import styles from "./Hero.module.css";
-
-const demoOutputs = [
-  "🚀 5 razones por las que tu negocio NECESITA IA ahora mismo...",
-  "📧 Asunto: La estrategia que duplicó nuestras ventas en 30 días",
-  "💡 Thread: Cómo pasé de $0 a $10k/mes con contenido automatizado",
-  "🎯 Instagram caption: El secreto que nadie te cuenta sobre crecer online...",
-];
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Hero() {
+  const { t, locale } = useLanguage();
   const [currentDemo, setCurrentDemo] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
 
   useEffect(() => {
-    const text = demoOutputs[currentDemo];
+    const outputs = t("hero.demoOutputs") || [];
+    const text = outputs[currentDemo];
+    if (!text) return;
     let i = 0;
     setDisplayText("");
     setIsTyping(true);
@@ -29,13 +26,13 @@ export default function Hero() {
         clearInterval(typeInterval);
         setIsTyping(false);
         setTimeout(() => {
-          setCurrentDemo((prev) => (prev + 1) % demoOutputs.length);
+          setCurrentDemo((prev) => (prev + 1) % outputs.length);
         }, 2500);
       }
     }, 35);
 
     return () => clearInterval(typeInterval);
-  }, [currentDemo]);
+  }, [currentDemo, locale, t]);
 
   return (
     <section className={styles.hero}>
@@ -46,33 +43,32 @@ export default function Hero() {
         <div className={styles.content}>
           <div className={`badge fade-in-up ${styles.badge}`} style={{ animationDelay: "0.1s" }}>
             <span>✨</span>
-            Potenciado por Gemini AI
+            {t("hero.badge")}
           </div>
 
           <h1 className={`${styles.headline} fade-in-up`} style={{ animationDelay: "0.2s" }}>
-            Genera contenido{" "}
-            <span className="gradient-text">viral</span>
-            {" "}en{" "}
+            {t("hero.title1")}
+            <span className="gradient-text">{t("hero.titleViral")}</span>
+            {t("hero.title2")}
             <br />
-            <span className="gradient-text">10 segundos</span>
+            <span className="gradient-text">{t("hero.titleTime")}</span>
           </h1>
 
           <p className={`${styles.subtitle} fade-in-up`} style={{ animationDelay: "0.3s" }}>
-            La IA más avanzada para crear posts, emails y blogs que enganchan.
-            Sin bloqueo creativo. Sin horas de trabajo. Sin límites.
+            {t("hero.subtitle")}
           </p>
 
           <div className={`${styles.ctas} fade-in-up`} style={{ animationDelay: "0.4s" }}>
             <Link href="/signup" className="btn-primary" id="hero-cta-primary" style={{ fontSize: "16px", padding: "14px 32px" }}>
-              Empezar ahora
+              {t("hero.ctaPrimary")}
               <span>→</span>
             </Link>
             <Link href="#features" className="btn-secondary" id="hero-cta-secondary" style={{ fontSize: "16px", padding: "14px 32px" }}>
-              Ver cómo funciona
+              {t("hero.ctaSecondary")}
             </Link>
           </div>
 
-          <p className={styles.note}>✓ Desde $1.99/mes &nbsp;✓ Pago con Bitcoin &nbsp;✓ Sin tarjeta de crédito</p>
+          <p className={styles.note}>{t("hero.note")}</p>
 
           <div className={`glass-card ${styles.demoCard} fade-in-up float-anim`} style={{ animationDelay: "0.5s" }}>
             <div className={styles.demoHeader}>
@@ -81,14 +77,14 @@ export default function Hero() {
                 <span style={{ background: "#febc2e" }} />
                 <span style={{ background: "#28c840" }} />
               </div>
-              <span className={styles.demoLabel}>ContentFlow AI • Generando...</span>
+              <span className={styles.demoLabel}>{t("hero.demoLabel")}</span>
             </div>
             <div className={styles.demoPrompt}>
               <span className={styles.promptLabel}>Prompt:</span>
-              <span className={styles.promptText}>Post viral sobre productividad con IA</span>
+              <span className={styles.promptText}>{t("hero.demoPrompt")}</span>
             </div>
             <div className={styles.demoOutput}>
-              <span className={styles.outputLabel}>✨ Resultado:</span>
+              <span className={styles.outputLabel}>{t("hero.demoResult")}</span>
               <p className={styles.typewriter}>
                 {displayText}
                 {isTyping && <span className={styles.cursor}>|</span>}
@@ -97,9 +93,9 @@ export default function Hero() {
 
             <div className={styles.statsRow}>
               {[
-                { value: "10s", label: "Tiempo generación" },
-                { value: "50+", label: "Tipos de contenido" },
-                { value: "12", label: "Idiomas" },
+                { value: "10s", label: t("hero.statTime") },
+                { value: "50+", label: t("hero.statTypes") },
+                { value: "12", label: t("hero.statLangs") },
               ].map((stat) => (
                 <div key={stat.label} className={styles.stat}>
                   <span className={styles.statValue}>{stat.value}</span>
@@ -113,3 +109,4 @@ export default function Hero() {
     </section>
   );
 }
+

@@ -1,57 +1,59 @@
-﻿"use client";
+"use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { auth } from "@/lib/firebase";
 import { btcWalletAddress } from "@/lib/config";
 import styles from "./Pricing.module.css";
-
-const plans = [
-  {
-    name: "Basic",
-    id: "basic",
-    price: "$1.99",
-    period: "/mes",
-    desc: "Para empezar a crear contenido",
-    features: ["10 generaciones por mes", "5 tipos de contenido", "1 idioma", "Historial básico"],
-    cta: "Empezar con Basic",
-    highlight: false,
-  },
-  {
-    name: "Starter",
-    id: "starter",
-    price: "$9",
-    period: "/mes",
-    desc: "Para creadores que quieren crecer",
-    features: ["100 generaciones por mes", "30+ tipos de contenido", "5 idiomas", "Historial completo", "Soporte por email"],
-    cta: "Empezar con Starter",
-    highlight: false,
-  },
-  {
-    name: "Pro",
-    id: "pro",
-    price: "$29",
-    period: "/mes",
-    desc: "Para negocios y agencias serias",
-    features: ["Generaciones ilimitadas", "50+ tipos de contenido", "12 idiomas", "Historial ilimitado", "Soporte prioritario 24/7", "API Access", "Team workspace"],
-    cta: "Empezar con Pro",
-    highlight: true,
-    badge: "MÁS POPULAR",
-  },
-  {
-    name: "Business",
-    id: "business",
-    price: "$79",
-    period: "/mes",
-    desc: "Para agencias autónomas de élite",
-    features: ["Todo lo de Pro", "Agentes IA autónomos", "Generación automática de TikToks", "Publicación automática", "IA para responder mensajes", "Creación masiva de contenido", "Soporte VIP dedicado 24/7"],
-    cta: "Empezar con Business",
-    highlight: false,
-  },
-];
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Pricing() {
   const router = useRouter();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { t } = useLanguage();
+
+  const plans = [
+    {
+      name: "Basic",
+      id: "basic",
+      price: "$1.99",
+      period: t("pricing.period"),
+      desc: t("pricing.basic.desc"),
+      features: t("pricing.basic.features") || [],
+      cta: t("pricing.basic.cta"),
+      highlight: false,
+    },
+    {
+      name: "Starter",
+      id: "starter",
+      price: "$9",
+      period: t("pricing.period"),
+      desc: t("pricing.starter.desc"),
+      features: t("pricing.starter.features") || [],
+      cta: t("pricing.starter.cta"),
+      highlight: false,
+    },
+    {
+      name: "Pro",
+      id: "pro",
+      price: "$29",
+      period: t("pricing.period"),
+      desc: t("pricing.pro.desc"),
+      features: t("pricing.pro.features") || [],
+      cta: t("pricing.pro.cta"),
+      highlight: true,
+      badge: t("pricing.popular"),
+    },
+    {
+      name: "Business",
+      id: "business",
+      price: "$79",
+      period: t("pricing.period"),
+      desc: t("pricing.business.desc"),
+      features: t("pricing.business.features") || [],
+      cta: t("pricing.business.cta"),
+      highlight: false,
+    },
+  ];
 
   const handleSelectPlan = async (plan: (typeof plans)[0]) => {
     const user = auth.currentUser;
@@ -92,13 +94,13 @@ export default function Pricing() {
     <section className={styles.section} id="pricing">
       <div className="container">
         <div className={styles.header}>
-          <div className="badge">₿ Bitcoin only</div>
+          <div className="badge">{t("pricing.badge")}</div>
           <h2 className={styles.title}>
-            Planes simples,{" "}
-            <span className="gradient-text">resultados extraordinarios</span>
+            {t("pricing.title1")}
+            <span className="gradient-text">{t("pricing.title2")}</span>
           </h2>
           <p className={styles.subtitle}>
-            Todos los planes se activan con Bitcoin. Sin tarjeta de crédito.
+            {t("pricing.subtitle")}
           </p>
         </div>
 
@@ -118,7 +120,7 @@ export default function Pricing() {
                 <span className={styles.period}>{plan.period}</span>
               </div>
               <ul className={styles.features}>
-                {plan.features.map((f) => (
+                {plan.features.map((f: string) => (
                   <li key={f} className={styles.feature}>
                     <span className={styles.check}>✓</span>
                     {f}
@@ -132,16 +134,17 @@ export default function Pricing() {
                 disabled={loadingPlan === plan.id}
                 style={{ width: "100%", justifyContent: "center", marginTop: "auto" }}
               >
-                {loadingPlan === plan.id ? "Preparando..." : plan.cta}
+                {loadingPlan === plan.id ? t("pricing.preparing") : plan.cta}
               </button>
             </div>
           ))}
         </div>
 
         <p className={styles.note}>
-          ₿ Activación con Bitcoin Mainnet &nbsp;•&nbsp; Sin tarjeta de crédito &nbsp;•&nbsp; Wallet: {btcWalletAddress}
+          {t("pricing.note")} {btcWalletAddress}
         </p>
       </div>
     </section>
   );
 }
+

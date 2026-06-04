@@ -8,12 +8,14 @@ import styles from "./layout.module.css";
 import { LayoutDashboard, History, Settings, LogOut, Sparkles } from "lucide-react";
 import { UserDataProvider, useUserData } from "./UserDataContext";
 import { isUnlimitedPlan } from "@/lib/config";
+import { useLanguage } from "@/context/LanguageContext";
 
 function DashboardShell({ user, children }: { user: User; children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { userData, refreshUserData } = useUserData();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (searchParams.get("payment") === "success") {
@@ -35,6 +37,15 @@ function DashboardShell({ user, children }: { user: User; children: React.ReactN
           ((userData?.generationsUsed || 0) / (userData?.generationsLimit || 10)) * 100
         );
 
+  const getPlanText = (plan?: string) => {
+    if (!plan || plan === "pending") return t("sidebar.noPlan");
+    if (plan === "pro") return "Pro";
+    if (plan === "business") return "Business";
+    if (plan === "starter") return "Starter";
+    if (plan === "basic") return "Basic";
+    return "Basic";
+  };
+
   return (
     <div className={styles.layout}>
       <aside className={styles.sidebar}>
@@ -51,21 +62,21 @@ function DashboardShell({ user, children }: { user: User; children: React.ReactN
             className={`${styles.navItem} ${pathname === "/dashboard" ? styles.active : ""}`}
           >
             <LayoutDashboard size={20} />
-            <span>Generador</span>
+            <span>{t("sidebar.generator")}</span>
           </Link>
           <Link
             href="/dashboard/history"
             className={`${styles.navItem} ${pathname === "/dashboard/history" ? styles.active : ""}`}
           >
             <History size={20} />
-            <span>Historial</span>
+            <span>{t("sidebar.history")}</span>
           </Link>
           <Link
             href="/dashboard/settings"
             className={`${styles.navItem} ${pathname === "/dashboard/settings" ? styles.active : ""}`}
           >
             <Settings size={20} />
-            <span>Configuración</span>
+            <span>{t("sidebar.settings")}</span>
           </Link>
         </nav>
 
@@ -73,18 +84,7 @@ function DashboardShell({ user, children }: { user: User; children: React.ReactN
           <div className={styles.planHeader}>
             <Sparkles size={16} className={styles.planIcon} />
             <span>
-              Plan{" "}
-              {userData?.plan === "pro"
-                ? "Pro"
-                : userData?.plan === "business"
-                  ? "Business"
-                  : userData?.plan === "starter"
-                    ? "Starter"
-                    : userData?.plan === "basic"
-                      ? "Basic"
-                      : userData?.plan === "pending" || !userData?.plan
-                        ? "Sin plan"
-                        : "Basic"}
+              {t("sidebar.plan")} {getPlanText(userData?.plan)}
             </span>
           </div>
           <div className={styles.usageBar}>
@@ -93,11 +93,11 @@ function DashboardShell({ user, children }: { user: User; children: React.ReactN
           <p className={styles.usageText}>
             {userData?.generationsUsed || 0} /{" "}
             {isUnlimitedPlan(userData?.plan) ? "∞" : userData?.generationsLimit || 25}{" "}
-            generaciones
+            {t("sidebar.generations")}
           </p>
           {!isUnlimitedPlan(userData?.plan) && (
             <Link href="/dashboard/settings" className={styles.upgradeBtn}>
-              Mejorar plan
+              {t("sidebar.upgrade")}
             </Link>
           )}
         </div>
@@ -110,7 +110,7 @@ function DashboardShell({ user, children }: { user: User; children: React.ReactN
             <span className={styles.userName}>{user.displayName || "Usuario"}</span>
             <span className={styles.userEmail}>{user.email}</span>
           </div>
-          <button onClick={handleLogout} className={styles.logoutBtn} title="Cerrar sesión">
+          <button onClick={handleLogout} className={styles.logoutBtn} title={t("sidebar.logout")}>
             <LogOut size={18} />
           </button>
         </div>
@@ -125,6 +125,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -146,7 +147,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className={styles.loader}>
         <div className={styles.spinner} />
-        <p>Cargando tu espacio...</p>
+        <p>{t("sidebar.loading")}</p>
       </div>
     );
   }
@@ -159,3 +160,4 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </UserDataProvider>
   );
 }
+

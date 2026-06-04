@@ -2,9 +2,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import styles from "./Navbar.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { locale, setLocale, t } = useLanguage();
 
   return (
     <nav className={styles.nav}>
@@ -15,17 +17,41 @@ export default function Navbar() {
         </Link>
 
         <div className={`${styles.links} ${menuOpen ? styles.open : ""}`}>
-          <Link href="#features" className={styles.link}>Características</Link>
-          <Link href="#pricing" className={styles.link}>Precios</Link>
-          <Link href="#testimonials" className={styles.link}>Testimonios</Link>
+          <Link href="#features" className={styles.link}>
+            {t("nav.features")}
+          </Link>
+          <Link href="#pricing" className={styles.link}>
+            {t("nav.pricing")}
+          </Link>
+          <Link href="#testimonials" className={styles.link}>
+            {t("nav.testimonials")}
+          </Link>
         </div>
 
         <div className={styles.actions}>
+          <div className={styles.langSelector}>
+            <button
+              onClick={() => setLocale("en")}
+              className={`${styles.langBtn} ${locale === "en" ? styles.activeLang : ""}`}
+              aria-label="Switch to English"
+            >
+              EN
+            </button>
+            <span className={styles.langDivider}>/</span>
+            <button
+              onClick={() => setLocale("es")}
+              className={`${styles.langBtn} ${locale === "es" ? styles.activeLang : ""}`}
+              aria-label="Cambiar a Español"
+            >
+              ES
+            </button>
+          </div>
+
           <Link href="/login" className="btn-secondary" style={{ padding: "10px 20px", fontSize: "14px" }}>
-            Iniciar sesión
+            {t("nav.login")}
           </Link>
           <Link href="/signup" className="btn-primary" style={{ padding: "10px 20px", fontSize: "14px" }}>
-            Empezar
+            {t("nav.getStarted")}
           </Link>
         </div>
 
@@ -43,3 +69,4 @@ export default function Navbar() {
     </nav>
   );
 }
+

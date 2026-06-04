@@ -1,7 +1,11 @@
+"use client";
 import Link from "next/link";
 import styles from "./Footer.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className={styles.footer}>
       <div className="container">
@@ -12,8 +16,7 @@ export default function Footer() {
               <span className="gradient-text">ContentFlow AI</span>
             </Link>
             <p className={styles.desc}>
-              La plataforma de generación de contenido con IA más avanzada del mundo.
-              Crea contenido viral en segundos.
+              {t("footer.desc")}
             </p>
             <div className={styles.socials}>
               <span aria-label="YouTube" title="YouTube" style={{ cursor: "default" }}>
@@ -58,19 +61,19 @@ export default function Footer() {
 
           <div className={styles.links}>
             <div className={styles.col}>
-              <h4>Producto</h4>
-              <Link href="#features">Características</Link>
-              <Link href="#pricing">Precios</Link>
-              <Link href="#testimonials">Testimonios</Link>
+              <h4>{t("footer.product")}</h4>
+              <Link href="#features">{t("nav.features")}</Link>
+              <Link href="#pricing">{t("nav.pricing")}</Link>
+              <Link href="#testimonials">{t("nav.testimonials")}</Link>
             </div>
             <div className={styles.col}>
-              <h4>Legal</h4>
+              <h4>{t("footer.legal")}</h4>
               <Link href="/privacy">Privacidad</Link>
               <Link href="/terms">Términos</Link>
               <Link href="/cookies">Cookies</Link>
             </div>
             <div className={styles.col}>
-              <h4>Soporte</h4>
+              <h4>{t("footer.links")}</h4>
               <a href="mailto:juanglopezh@gmail.com">Contacto</a>
               <Link href="/help">Ayuda</Link>
               <Link href="/status">Estado</Link>
@@ -79,10 +82,11 @@ export default function Footer() {
         </div>
 
         <div className={styles.bottom}>
-          <p>© {new Date().getFullYear()} ContentFlow AI. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} ContentFlow AI. {t("footer.rights")}</p>
           <p>Hecho con ❤️ y potenciado por Gemini AI</p>
         </div>
       </div>
     </footer>
   );
 }
+

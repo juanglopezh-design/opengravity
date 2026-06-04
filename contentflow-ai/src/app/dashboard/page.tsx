@@ -6,25 +6,40 @@ import { Copy, Check, Sparkles, RefreshCw } from "lucide-react";
 import { getApiUrl } from "@/lib/api-helper";
 import { useUserData } from "./UserDataContext";
 import Link from "next/link";
-
-const contentTypes = [
-  "Post de LinkedIn (Profesional)",
-  "Hilo de Twitter/X (Enganchador)",
-  "Caption de Instagram (Lifestyle)",
-  "Email de Ventas (Conversión)",
-  "Newsletter (Informativo)",
-  "Idea para Video de YouTube/TikTok",
-];
-
-const tones = ["Profesional", "Inspirador", "Humorístico", "Directo", "Conversacional"];
-const languages = ["Español", "Inglés", "Portugués", "Francés"];
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Dashboard() {
   const { applyUsageFromServer, refreshUserData, userData } = useUserData();
+  const { t, locale } = useLanguage();
+
+  const contentTypesMap = [
+    { value: "Post de LinkedIn (Profesional)", label: t("type.linkedin") },
+    { value: "Hilo de Twitter/X (Enganchador)", label: t("type.twitter") },
+    { value: "Caption de Instagram (Lifestyle)", label: t("type.instagram") },
+    { value: "Email de Ventas (Conversión)", label: t("type.email") },
+    { value: "Newsletter (Informativo)", label: t("type.newsletter") },
+    { value: "Idea para Video de YouTube/TikTok", label: t("type.youtube") },
+  ];
+
+  const tonesMap = [
+    { value: "Profesional", label: t("tone.professional") },
+    { value: "Inspirador", label: t("tone.inspiring") },
+    { value: "Humorístico", label: t("tone.humorous") },
+    { value: "Directo", label: t("tone.direct") },
+    { value: "Conversacional", label: t("tone.conversational") },
+  ];
+
+  const languagesMap = [
+    { value: "Español", label: locale === "es" ? "Español" : "Spanish" },
+    { value: "Inglés", label: locale === "es" ? "Inglés" : "English" },
+    { value: "Portugués", label: locale === "es" ? "Portugués" : "Portuguese" },
+    { value: "Francés", label: locale === "es" ? "Francés" : "French" },
+  ];
+
   const [prompt, setPrompt] = useState("");
-  const [type, setType] = useState(contentTypes[0]);
-  const [tone, setTone] = useState(tones[0]);
-  const [language, setLanguage] = useState(languages[0]);
+  const [type, setType] = useState("Post de LinkedIn (Profesional)");
+  const [tone, setTone] = useState("Profesional");
+  const [language, setLanguage] = useState("Español");
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
@@ -70,7 +85,7 @@ export default function Dashboard() {
         await refreshUserData();
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Error al generar el contenido";
+      const message = err instanceof Error ? err.message : t("dash.error");
       setError(message);
     } finally {
       setLoading(false);
@@ -92,14 +107,13 @@ export default function Dashboard() {
           justifyContent: "center", minHeight: "60vh", textAlign: "center", gap: "20px"
         }}>
           <Sparkles size={56} style={{ color: "var(--accent-purple)", opacity: 0.8 }} />
-          <h2 style={{ fontSize: "24px", fontWeight: 700 }}>Activa tu plan para empezar</h2>
+          <h2 style={{ fontSize: "24px", fontWeight: 700 }}>{t("dash.needPlan")}</h2>
           <p style={{ color: "var(--text-secondary)", maxWidth: "400px" }}>
-            Necesitas un plan activo para usar el generador de contenido.
-            Desde $1.99/mes con Bitcoin.
+            {t("dash.needPlanDesc")}
           </p>
           <Link href="/dashboard/settings" className="btn-primary" style={{ padding: "14px 32px", fontSize: "16px" }}>
             <Sparkles size={18} />
-            Ver planes y activar
+            {t("dash.needPlanCta")}
           </Link>
         </div>
       </div>
@@ -109,18 +123,18 @@ export default function Dashboard() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Generador de Contenido</h1>
-        <p className={styles.subtitle}>Describe lo que necesitas y la IA hará el resto.</p>
+        <h1 className={styles.title}>{t("dash.title")}</h1>
+        <p className={styles.subtitle}>{t("dash.subtitle")}</p>
       </header>
 
       <div className={styles.grid}>
         <div className={styles.formCol}>
           <form onSubmit={handleGenerate} className={`glass-card ${styles.card}`}>
             <div className={styles.field}>
-              <label>¿De qué quieres hablar? *</label>
+              <label>{t("dash.promptLabel")}</label>
               <textarea
                 className="input-field"
-                placeholder="Ej: Tres consejos sobre cómo usar la Inteligencia Artificial para ahorrar tiempo..."
+                placeholder={t("dash.promptPlaceholder")}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 required
@@ -130,21 +144,21 @@ export default function Dashboard() {
 
             <div className={styles.row}>
               <div className={styles.field}>
-                <label>Tipo de contenido</label>
+                <label>{t("dash.contentType")}</label>
                 <select className="input-field" value={type} onChange={(e) => setType(e.target.value)}>
-                  {contentTypes.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  {contentTypesMap.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
                     </option>
                   ))}
                 </select>
               </div>
               <div className={styles.field}>
-                <label>Tono</label>
+                <label>{t("dash.tone")}</label>
                 <select className="input-field" value={tone} onChange={(e) => setTone(e.target.value)}>
-                  {tones.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  {tonesMap.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
                     </option>
                   ))}
                 </select>
@@ -152,15 +166,15 @@ export default function Dashboard() {
             </div>
 
             <div className={styles.field}>
-              <label>Idioma</label>
+              <label>{t("dash.language")}</label>
               <select
                 className="input-field"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
               >
-                {languages.map((l) => (
-                  <option key={l} value={l}>
-                    {l}
+                {languagesMap.map((l) => (
+                  <option key={l.value} value={l.value}>
+                    {l.label}
                   </option>
                 ))}
               </select>
@@ -176,11 +190,11 @@ export default function Dashboard() {
             >
               {loading ? (
                 <>
-                  <RefreshCw size={18} className={styles.spin} /> Generando magia...
+                  <RefreshCw size={18} className={styles.spin} /> {t("dash.generating")}
                 </>
               ) : (
                 <>
-                  <Sparkles size={18} /> Generar contenido
+                  <Sparkles size={18} /> {t("dash.generateCta")}
                 </>
               )}
             </button>
@@ -192,10 +206,10 @@ export default function Dashboard() {
             {result ? (
               <>
                 <div className={styles.resultHeader}>
-                  <span className="badge">✨ Resultado Final</span>
-                  <button onClick={copyToClipboard} className={styles.copyBtn} title="Copiar">
+                  <span className="badge">{t("dash.resultHeader")}</span>
+                  <button onClick={copyToClipboard} className={styles.copyBtn} title={t("dash.copy")}>
                     {copied ? <Check size={18} color="#10b981" /> : <Copy size={18} />}
-                    {copied ? "Copiado" : "Copiar"}
+                    {copied ? t("dash.copied") : t("dash.copy")}
                   </button>
                 </div>
                 <div className={styles.resultContent}>
@@ -210,8 +224,8 @@ export default function Dashboard() {
             ) : (
               <div className={styles.emptyState}>
                 <Sparkles size={48} className={styles.emptyIcon} />
-                <h3>Tu contenido aparecerá aquí</h3>
-                <p>Llena el formulario a la izquierda y presiona generar.</p>
+                <h3>{t("dash.emptyTitle")}</h3>
+                <p>{t("dash.emptyDesc")}</p>
               </div>
             )}
           </div>
@@ -220,3 +234,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

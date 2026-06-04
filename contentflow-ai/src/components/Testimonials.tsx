@@ -1,68 +1,72 @@
+"use client";
 import styles from "./Testimonials.module.css";
-
-const testimonials = [
-  {
-    name: "María González",
-    role: "Content Creator • 250K seguidores",
-    avatar: "MG",
-    color: "#8b5cf6",
-    text: "ContentFlow AI cambió completamente mi flujo de trabajo. Antes pasaba 3 horas al día creando contenido. Ahora lo hago en 20 minutos. ¡Increíble!",
-    stars: 5,
-  },
-  {
-    name: "Carlos Rodríguez",
-    role: "CEO • Agencia de Marketing Digital",
-    avatar: "CR",
-    color: "#3b82f6",
-    text: "Manejo contenido para 15 clientes y esta herramienta es la razón por la que sigo siendo rentable. El ROI es brutal. La recomiendo 100%.",
-    stars: 5,
-  },
-  {
-    name: "Ana Martínez",
-    role: "Emprendedora • E-commerce",
-    avatar: "AM",
-    color: "#06b6d4",
-    text: "Mis ventas aumentaron 40% en el primer mes. El contenido que genera es tan bueno que mis clientes me preguntan quién es mi copywriter.",
-    stars: 5,
-  },
-  {
-    name: "David Pérez",
-    role: "Coach de Negocios",
-    avatar: "DP",
-    color: "#f59e0b",
-    text: "La calidad del contenido es impresionante. Genera exactamente lo que necesito para cada plataforma. La función de 12 idiomas es un plus enorme.",
-    stars: 5,
-  },
-  {
-    name: "Laura Sánchez",
-    role: "Influencer de Lifestyle",
-    avatar: "LS",
-    color: "#ec4899",
-    text: "Probé mil herramientas de IA y ninguna llegaba a este nivel. ContentFlow AI entiende el tono y la voz que busco. ¡Es como tener un asistente personal!",
-    stars: 5,
-  },
-  {
-    name: "Roberto Lima",
-    role: "Fundador • SaaS B2B",
-    avatar: "RL",
-    color: "#10b981",
-    text: "Usamos ContentFlow para todo: emails de ventas, posts de LinkedIn, blog posts. Ha reducido nuestros costos de marketing en un 60%.",
-    stars: 5,
-  },
-];
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Testimonials() {
+  const { t } = useLanguage();
+
+  const testimonials = [
+    {
+      name: "María González",
+      role: t("testimonials.item1.role"),
+      avatar: "MG",
+      color: "#8b5cf6",
+      text: t("testimonials.item1.text"),
+      stars: 5,
+    },
+    {
+      name: "Carlos Rodríguez",
+      role: t("testimonials.item2.role"),
+      avatar: "CR",
+      color: "#3b82f6",
+      text: t("testimonials.item2.text"),
+      stars: 5,
+    },
+    {
+      name: "Ana Martínez",
+      role: t("testimonials.item3.role"),
+      avatar: "AM",
+      color: "#06b6d4",
+      text: t("testimonials.item3.text"),
+      stars: 5,
+    },
+    {
+      name: "David Pérez",
+      role: t("testimonials.item4.role"),
+      avatar: "DP",
+      color: "#f59e0b",
+      text: t("testimonials.item4.text"),
+      stars: 5,
+    },
+    {
+      name: "Laura Sánchez",
+      role: t("testimonials.item5.role"),
+      avatar: "LS",
+      color: "#ec4899",
+      text: t("testimonials.item5.text"),
+      stars: 5,
+    },
+    {
+      name: "Roberto Lima",
+      role: t("testimonials.item6.role"),
+      avatar: "RL",
+      color: "#10b981",
+      text: t("testimonials.item6.text"),
+      stars: 5,
+    },
+  ];
+
   return (
     <section className={styles.section} id="testimonials">
       <div className="container">
         <div className={styles.header}>
-          <div className="badge">❤️ Testimonios</div>
+          <div className="badge">{t("testimonials.badge")}</div>
           <h2 className={styles.title}>
-            Miles de creadores ya{" "}
-            <span className="gradient-text">confían en nosotros</span>
+            {t("testimonials.title1")}
+            <span className="gradient-text">{t("testimonials.title2")}</span>
           </h2>
           <p className={styles.subtitle}>
-            No lo decimos nosotros, lo dicen los resultados reales de nuestra comunidad.
+            {t("testimonials.subtitle")}
           </p>
         </div>
 
@@ -92,3 +96,4 @@ export default function Testimonials() {
     </section>
   );
 }
+

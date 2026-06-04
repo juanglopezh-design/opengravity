@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { LanguageProvider } from "@/context/LanguageContext";
 
 import { siteUrl } from "@/lib/config";
 const siteTitle = "ContentFlow AI";
 const siteDescription =
-  "La plataforma de IA para crear posts, emails y blogs listos para publicar en segundos.";
+  "La plataforma de generación de contenido con IA más avanzada en español e inglés. The most advanced AI content generator platform in English and Spanish.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${siteTitle} - Genera contenido viral en 10 segundos`,
+    default: `${siteTitle} - Genera contenido viral en 10 segundos | Generate viral content in 10 seconds`,
     template: `%s | ${siteTitle}`,
   },
   description: siteDescription,
@@ -18,18 +19,22 @@ export const metadata: Metadata = {
     "inteligencia artificial",
     "redes sociales",
     "marketing de contenido",
+    "AI content generator",
+    "content creation AI",
     "SaaS",
+    "Bitcoin SaaS",
   ],
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: `${siteTitle} - Genera contenido viral en 10 segundos`,
+    title: `${siteTitle} - Genera contenido viral | Generate viral content`,
     description: siteDescription,
     url: siteUrl,
     siteName: siteTitle,
     type: "website",
-    locale: "es_ES",
+    locale: "en_US",
+    alternateLocale: ["es_ES"],
     images: [
       {
         url: "/og-image.svg",
@@ -41,7 +46,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteTitle} - Genera contenido viral en 10 segundos`,
+    title: `${siteTitle} - Genera contenido viral | Generate viral content`,
     description: siteDescription,
     images: ["/og-image.svg"],
   },
@@ -53,8 +58,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
-      <body>{children}</body>
+    <html lang="en">
+      <body>
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
+      </body>
     </html>
   );
 }
+

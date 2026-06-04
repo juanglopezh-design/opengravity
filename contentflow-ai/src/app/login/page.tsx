@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,6 +7,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import styles from "./auth.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 function LoginForm() {
   const router = useRouter();
@@ -17,6 +18,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   const ensureUserDoc = async (user: User) => {
     const userRef = doc(db, "users", user.uid);
@@ -76,7 +78,7 @@ function LoginForm() {
       const { user } = await signInWithEmailAndPassword(auth, email.trim(), password);
       await routeAfterAuth(user);
     } catch (err) {
-      setError(getAuthErrorMessage(err, "No pudimos iniciar sesión. Revisa tus datos e inténtalo de nuevo."));
+      setError(getAuthErrorMessage(err, t("login.error")));
     } finally {
       setLoading(false);
     }
@@ -92,7 +94,7 @@ function LoginForm() {
       await ensureUserDoc(user);
       await routeAfterAuth(user);
     } catch (err) {
-      setError(getAuthErrorMessage(err, "No pudimos iniciar sesión con Google. Inténtalo de nuevo."));
+      setError(getAuthErrorMessage(err, t("signup.error")));
     } finally {
       setLoading(false);
     }
@@ -110,8 +112,8 @@ function LoginForm() {
         </Link>
 
         <div className={styles.header}>
-          <h1 className={styles.title}>Bienvenido de vuelta</h1>
-          <p className={styles.subtitle}>Inicia sesión para continuar generando contenido</p>
+          <h1 className={styles.title}>{t("login.title")}</h1>
+          <p className={styles.subtitle}>{t("login.subtitle")}</p>
         </div>
 
         <button
@@ -127,14 +129,14 @@ function LoginForm() {
             <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.3 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.1C9.5 36.2 16.2 44 24 44z" />
             <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.5l6.2 5.2C41.8 35.5 44 30.1 44 24c0-1.3-.1-2.6-.4-3.9z" />
           </svg>
-          Continuar con Google
+          {t("auth.google")}
         </button>
 
-        <div className={styles.divider}><span>o con email</span></div>
+        <div className={styles.divider}><span>{t("auth.divider")}</span></div>
 
         <form onSubmit={handleLogin} className={styles.form}>
           <div className={styles.field}>
-            <label htmlFor="login-email">Email</label>
+            <label htmlFor="login-email">{t("auth.email")}</label>
             <input
               id="login-email"
               name="email"
@@ -148,7 +150,7 @@ function LoginForm() {
             />
           </div>
           <div className={styles.field}>
-            <label htmlFor="login-password">Contraseña</label>
+            <label htmlFor="login-password">{t("auth.password")}</label>
             <input
               id="login-password"
               name="password"
@@ -171,16 +173,16 @@ function LoginForm() {
             style={{ width: "100%", justifyContent: "center" }}
             disabled={loading}
           >
-            {loading ? "Iniciando sesión..." : "Iniciar sesión"}
+            {loading ? t("login.submitting") : t("login.submit")}
           </button>
         </form>
 
         <p className={styles.switchLink}>
-          ¿No tienes cuenta?{" "}
-          <Link href="/signup">Regístrate</Link>
+          {t("auth.noAccount")}{" "}
+          <Link href="/signup">{t("auth.signupLink")}</Link>
         </p>
         <p className={styles.switchLink}>
-          <Link href="/forgot-password">¿Olvidaste tu contraseña?</Link>
+          <Link href="/forgot-password">{t("auth.forgotLink")}</Link>
         </p>
       </div>
     </div>
@@ -194,3 +196,4 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+

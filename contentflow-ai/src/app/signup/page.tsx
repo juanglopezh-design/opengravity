@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -7,6 +7,7 @@ import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { getAuthErrorMessage } from "@/lib/auth-errors";
 import styles from "../login/auth.module.css";
+import { useLanguage } from "@/context/LanguageContext";
 
 function SignupForm() {
   const router = useRouter();
@@ -17,6 +18,7 @@ function SignupForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useLanguage();
 
   const createUserDoc = async (uid: string, displayName: string, userEmail: string) => {
     const userRef = doc(db, "users", uid);
@@ -74,7 +76,7 @@ function SignupForm() {
       await createUserDoc(user.uid, trimmedName, trimmedEmail);
       await routeAfterSignup(user);
     } catch (err) {
-      setError(getAuthErrorMessage(err, "No pudimos crear la cuenta. Inténtalo de nuevo en unos minutos."));
+      setError(getAuthErrorMessage(err, t("signup.error")));
     } finally {
       setLoading(false);
     }
@@ -90,7 +92,7 @@ function SignupForm() {
       await createUserDoc(user.uid, user.displayName || "Usuario", user.email || "");
       await routeAfterSignup(user);
     } catch (err) {
-      setError(getAuthErrorMessage(err, "No pudimos registrarte con Google. Inténtalo de nuevo."));
+      setError(getAuthErrorMessage(err, t("signup.error")));
     } finally {
       setLoading(false);
     }
@@ -108,12 +110,12 @@ function SignupForm() {
         </Link>
 
         <div className={styles.header}>
-          <h1 className={styles.title}>Crea tu cuenta</h1>
+          <h1 className={styles.title}>{t("signup.title")}</h1>
           <p className={styles.subtitle}>
-            {plan === "pro" ? "Plan Pro - Generaciones ilimitadas" :
-             plan === "starter" ? "Plan Starter - 100 generaciones/mes" :
-             plan === "business" ? "Plan Business - Automatización avanzada" :
-             "Plan Basic - 10 generaciones/mes por $1.99"}
+            {plan === "pro" ? `${t("pricing.pro.desc")} (Pro)` :
+             plan === "starter" ? `${t("pricing.starter.desc")} (Starter)` :
+             plan === "business" ? `${t("pricing.business.desc")} (Business)` :
+             `${t("pricing.basic.desc")} (Basic)`}
           </p>
         </div>
 
@@ -124,28 +126,28 @@ function SignupForm() {
             <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.3 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.1C9.5 36.2 16.2 44 24 44z" />
             <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.5l6.2 5.2C41.8 35.5 44 30.1 44 24c0-1.3-.1-2.6-.4-3.9z" />
           </svg>
-          Registrarse con Google
+          {t("auth.google")}
         </button>
 
-        <div className={styles.divider}><span>o con email</span></div>
+        <div className={styles.divider}><span>{t("auth.divider")}</span></div>
 
         <form onSubmit={handleSignup} className={styles.form}>
           <div className={styles.field}>
-            <label htmlFor="signup-name">Nombre completo</label>
+            <label htmlFor="signup-name">{t("signup.name")}</label>
             <input
               id="signup-name"
               name="name"
               type="text"
               autoComplete="name"
               className="input-field"
-              placeholder="Tu nombre"
+              placeholder="..."
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
           <div className={styles.field}>
-            <label htmlFor="signup-email">Email</label>
+            <label htmlFor="signup-email">{t("auth.email")}</label>
             <input
               id="signup-email"
               name="email"
@@ -159,14 +161,14 @@ function SignupForm() {
             />
           </div>
           <div className={styles.field}>
-            <label htmlFor="signup-password">Contraseña</label>
+            <label htmlFor="signup-password">{t("auth.password")}</label>
             <input
               id="signup-password"
               name="new-password"
               type="password"
               autoComplete="new-password"
               className="input-field"
-              placeholder="Mínimo 6 caracteres"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               minLength={6}
@@ -177,12 +179,12 @@ function SignupForm() {
           {error && <div className={styles.error} role="alert" aria-live="polite">{error}</div>}
 
           <button id="signup-submit-btn" type="submit" className="btn-primary" style={{ width: "100%", justifyContent: "center" }} disabled={loading}>
-            {loading ? "Creando cuenta..." : "Crear cuenta"}
+            {loading ? t("signup.submitting") : t("signup.submit")}
           </button>
         </form>
 
         <p className={styles.switchLink}>
-          ¿Ya tienes cuenta? <Link href="/login">Iniciar sesión</Link>
+          {t("auth.hasAccount")} <Link href="/login">{t("auth.loginLink")}</Link>
         </p>
       </div>
     </div>
@@ -196,3 +198,4 @@ export default function SignupPage() {
     </Suspense>
   );
 }
+

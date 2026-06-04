@@ -1,51 +1,54 @@
+"use client";
 import styles from "./Features.module.css";
-
-const features = [
-  {
-    icon: "⚡",
-    title: "Generación instantánea",
-    desc: "Contenido listo en menos de 10 segundos. Sin esperas, sin frustraciones. Solo resultados.",
-  },
-  {
-    icon: "🎯",
-    title: "50+ tipos de contenido",
-    desc: "Posts de Instagram, threads de X, emails, blogs, captions de TikTok, anuncios y mucho más.",
-  },
-  {
-    icon: "🌍",
-    title: "12 idiomas",
-    desc: "Genera en español, inglés, portugués, francés, alemán y más. Llega a audiencias globales.",
-  },
-  {
-    icon: "🤖",
-    title: "Gemini AI de Google",
-    desc: "Powered by la IA más avanzada de Google. Resultados que suenan humanos, no robóticos.",
-  },
-  {
-    icon: "📊",
-    title: "Historial completo",
-    desc: "Guarda todo el contenido generado. Búscalo, edítalo y reutilízalo cuando quieras.",
-  },
-  {
-    icon: "🔒",
-    title: "100% privado y seguro",
-    desc: "Tu contenido es tuyo. Nunca lo usamos para entrenar modelos ni lo compartimos con terceros.",
-  },
-];
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Features() {
+  const { t } = useLanguage();
+
+  const features = [
+    {
+      icon: "⚡",
+      title: t("features.item1.title"),
+      desc: t("features.item1.desc"),
+    },
+    {
+      icon: "🎯",
+      title: t("features.item2.title"),
+      desc: t("features.item2.desc"),
+    },
+    {
+      icon: "🌍",
+      title: t("features.item3.title"),
+      desc: t("features.item3.desc"),
+    },
+    {
+      icon: "🤖",
+      title: t("features.item4.title"),
+      desc: t("features.item4.desc"),
+    },
+    {
+      icon: "📊",
+      title: t("features.item5.title"),
+      desc: t("features.item5.desc"),
+    },
+    {
+      icon: "🔒",
+      title: t("features.item6.title"),
+      desc: t("features.item6.desc"),
+    },
+  ];
+
   return (
     <section className={styles.section} id="features">
       <div className="container">
         <div className={styles.header}>
-          <div className="badge">🛠️ Características</div>
+          <div className="badge">{t("features.badge")}</div>
           <h2 className={styles.title}>
-            Todo lo que necesitas para{" "}
-            <span className="gradient-text">dominar el contenido</span>
+            {t("features.title1")}
+            <span className="gradient-text">{t("features.title2")}</span>
           </h2>
           <p className={styles.subtitle}>
-            Una plataforma completa diseñada para creadores, marketers y negocios
-            que quieren crecer sin perder horas creando contenido.
+            {t("features.subtitle")}
           </p>
         </div>
 
@@ -68,3 +71,4 @@ export default function Features() {
     </section>
   );
 }
+
