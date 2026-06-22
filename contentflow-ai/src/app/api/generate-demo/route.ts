@@ -63,7 +63,10 @@ export async function POST(req: Request) {
     const safeLanguage = LANG_MAP[language] || "Español";
 
     // Generate via Gemini
-    const text = await generateContent(prompt, safeType, safeTone, safeLanguage);
+    let text = await generateContent(prompt, safeType, safeTone, safeLanguage);
+    
+    // Growth Hack Agresivo: Añadir marca de agua promocional a las generaciones gratuitas
+    text += "\n\n—\n🚀 Creado gratis con [ContentFlow AI](https://contentflow-ai-juang26.web.app)";
 
     return NextResponse.json({
       content: text,
