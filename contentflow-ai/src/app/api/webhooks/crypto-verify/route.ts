@@ -244,7 +244,30 @@ export async function POST(req: Request) {
 
       // Send emails (non-blocking)
       const userDoc = await adminDb.collection("users").doc(userId).get();
-      const userEmail = userDoc.data()?.email as string | undefined;
+      const userData = userDoc.data();
+      const userEmail = userData?.email as string | undefined;
+      const referredBy = userData?.referredBy as string | undefined;
+
+      if (referredBy) {
+        try {
+          const planPrice = planPricesUsd[planId] ?? 0;
+          await adminDb.collection("commissions").add({
+            referrerId: referredBy,
+            referredUserId: userId,
+            planId: planId,
+            amountUsd: planPrice,
+            commissionUsd: planPrice * 0.30,
+            btcAmount: Number(btcAmount) || 0,
+            commissionBtc: (Number(btcAmount) || 0) * 0.30,
+            status: "pending",
+            txHash: txHash,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          console.log(`[CryptoVerify] Registered 30% commission for referrer ${referredBy} from user ${userId}`);
+        } catch (commError) {
+          console.error("[CryptoVerify] Error writing affiliate commission:", commError);
+        }
+      }
 
       sendPaymentNotification({ userEmail, userId, planId, priceUsd: planPricesUsd[planId] ?? 0, txHash, verificationSource });
 

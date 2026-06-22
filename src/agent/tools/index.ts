@@ -1,5 +1,7 @@
 import { LLMTool } from '../../llm/client.js';
 import { dbAddRemoteCommand, dbGetPendingCommands } from '../../memory/database.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { config } from '../../config.js';
 
 export interface AgentTool {
   definition: LLMTool;
@@ -148,6 +150,46 @@ toolsRegistry['open_local_url'] = openUrlTool;
 toolsRegistry['read_local_file'] = readLocalFileTool;
 toolsRegistry['write_local_file'] = writeLocalFileTool;
 toolsRegistry['list_local_directory'] = listLocalDirectoryTool;
+
+// Tool to ask Antigravity (Gemini) directly
+export const askAntigravityTool: AgentTool = {
+  definition: {
+    type: 'function',
+    function: {
+      name: 'ask_antigravity',
+      description: 'Sends a question directly to Antigravity, a powerful AI assistant powered by Google Gemini. Use this when the user wants to ask Antigravity something, wants a second opinion, or needs a complex question answered by a different AI.',
+      parameters: {
+        type: 'object',
+        properties: {
+          question: {
+            type: 'string',
+            description: 'The full question or message to send to Antigravity.'
+          }
+        },
+        required: ['question'],
+      },
+    },
+  },
+  execute: async (args: { question: string }) => {
+    if (!config.GEMINI_API_KEY) {
+      return 'Error: GEMINI_API_KEY no está configurada. Añádela al .env para que pueda hablar con Antigravity.';
+    }
+    try {
+      const genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-2.0-flash',
+        systemInstruction: 'Eres Antigravity, un asistente de IA avanzado creado por Google DeepMind. Eres el asistente de IA principal del usuario y ahora estás siendo consultado por OpenGravity, un bot de Telegram. Responde de manera clara, concisa y útil.'
+      });
+      const result = await model.generateContent(args.question);
+      const text = result.response.text();
+      return `🤖 Antigravity dice:\n\n${text}`;
+    } catch (error: any) {
+      return `Error al contactar con Antigravity: ${error.message}`;
+    }
+  },
+};
+
+toolsRegistry['ask_antigravity'] = askAntigravityTool;
 
 export const getAvailableTools = (): LLMTool[] => {
   return Object.values(toolsRegistry).map(t => t.definition);

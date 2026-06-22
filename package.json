@@ -13,6 +13,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "dotenv": "^16.4.5",
     "firebase-admin": "^13.7.0",
     "grammy": "^1.32.0",

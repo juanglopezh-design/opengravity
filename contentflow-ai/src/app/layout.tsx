@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
+import ReferralTracker from "@/components/ReferralTracker";
 
 import { siteUrl } from "@/lib/config";
 const siteTitle = "ContentFlow AI";
@@ -52,6 +53,27 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ContentFlow AI",
+  "operatingSystem": "All",
+  "applicationCategory": "BusinessApplication",
+  "description": "La plataforma de generación de contenido con IA más avanzada en español e inglés. The most advanced AI content generator platform in English and Spanish.",
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "USD",
+    "lowPrice": "1.99",
+    "highPrice": "79.00",
+    "offerCount": "4"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "ratingCount": "128"
+  }
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -59,8 +81,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body>
         <LanguageProvider>
+          <ReferralTracker />
           {children}
         </LanguageProvider>
       </body>

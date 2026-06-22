@@ -14,7 +14,8 @@ const envSchema = z.object({
   OPENROUTER_MODEL: z.string().default('openrouter/free'),
   DB_PATH: z.string().default('./memory.db'),
   GOOGLE_APPLICATION_CREDENTIALS: z.string().optional(),
-  FIREBASE_SERVICE_ACCOUNT: z.string().optional()
+  FIREBASE_SERVICE_ACCOUNT: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional()
 });
 
 const parsed = envSchema.safeParse(process.env);

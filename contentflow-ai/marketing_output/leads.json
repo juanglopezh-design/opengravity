@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Founders and Coders",
+    "company": "Indie Hacker / Startup",
+    "email": "hello@foundersandcoders.com",
+    "niche": "founder",
+    "source": "GitHub Public Profiles"
+  },
+  {
+    "name": "Leuchtfeuer Digital Marketing",
+    "company": "Indie Hacker / Startup",
+    "email": "dev@Leuchtfeuer.com",
+    "niche": "marketing agency",
+    "source": "GitHub Public Profiles"
+  },
+  {
+    "name": "Wpromote",
+    "company": "Indie Hacker / Startup",
+    "email": "tech@wpromote.com",
+    "niche": "marketing agency",
+    "source": "GitHub Public Profiles"
+  },
+  {
+    "name": "Brainlabs",
+    "company": "Indie Hacker / Startup",
+    "email": "hello@brainlabsdigital.com",
+    "niche": "marketing agency",
+    "source": "GitHub Public Profiles"
+  },
+  {
+    "name": "Ueno: A full-service agency",
+    "company": "Indie Hacker / Startup",
+    "email": "hi@ueno.co",
+    "niche": "marketing agency",
+    "source": "GitHub Public Profiles"
+  },
+  {
+    "name": "The KPI Hub",
+    "company": "Indie Hacker / Startup",
+    "email": "ceo@thekpihub.com",
+    "niche": "ceo saas",
+    "source": "GitHub Public Profiles"
+  }
+]

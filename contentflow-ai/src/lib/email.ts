@@ -140,3 +140,67 @@ export async function sendUserPaymentConfirmation({
     console.error("[Email] User confirmation error:", err);
   }
 }
+
+/** Correo de bienvenida y onboarding persuasivo al registrarse */
+export async function sendWelcomeOnboardingEmail({
+  userEmail,
+  userName,
+}: {
+  userEmail: string;
+  userName: string;
+}) {
+  if (!process.env.RESEND_API_KEY || !userEmail) return;
+
+  const appUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://contentflow-ai-juang26.web.app";
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: userEmail,
+      subject: `⚡ ¡Bienvenido a ContentFlow AI, ${userName}!`,
+      html: `
+        <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px 24px;background:#0f0f1a;color:#e2e8f0;border-radius:12px;">
+          <div style="text-align:center;margin-bottom:32px;">
+            <div style="font-size:48px;margin-bottom:8px;">⚡</div>
+            <h1 style="color:#a855f7;margin:0;font-size:24px;">ContentFlow AI</h1>
+            <p style="color:#64748b;font-size:14px;margin-top:4px;">Tu motor de contenido viral acelerado por IA</p>
+          </div>
+
+          <h2 style="color:#f1f5f9;font-size:20px;margin-bottom:8px;">¡Hola ${userName}! 👋</h2>
+          <p style="color:#94a3b8;margin-bottom:18px;line-height:1.6;">
+            Gracias por unirte a la plataforma de generación de contenido de mayor conversión del mundo. Estamos encantados de tenerte a bordo.
+          </p>
+
+          <p style="color:#94a3b8;margin-bottom:24px;line-height:1.6;">
+            Con ContentFlow AI, puedes multiplicar tu audiencia creando contenido viral en LinkedIn, Twitter/X, Instagram y correos de venta en solo 10 segundos.
+          </p>
+
+          <div style="background:#1e1b4b;border-radius:10px;padding:24px;margin-bottom:30px;">
+            <h3 style="color:#f1f5f9;margin-top:0;font-size:16px;">🚀 Tus siguientes pasos:</h3>
+            <ol style="color:#94a3b8;padding-left:20px;margin-bottom:0;line-height:1.8;">
+              <li><strong>Activa tu Plan VIP:</strong> Consigue generaciones ilimitadas o incrementadas desde $1.99/mes con Bitcoin (¡sin tarjetas de crédito!).</li>
+              <li><strong>Elige tu Canal:</strong> LinkedIn, X, email o ideas de video.</li>
+              <li><strong>Genera tu primer post:</strong> Describe tu tema y mira cómo la IA hace el trabajo pesado con tonos humanos y persuasivos.</li>
+            </ol>
+          </div>
+
+          <div style="text-align:center;margin-bottom:30px;">
+            <a href="${appUrl}/dashboard" style="display:inline-block;background:linear-gradient(135deg,#8b5cf6,#3b82f6);color:#fff;padding:14px 32px;border-radius:10px;font-weight:700;text-decoration:none;font-size:16px;box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);">
+              Entrar al Dashboard →
+            </a>
+          </div>
+
+          <hr style="border:0;border-top:1px solid #1e293b;margin:30px 0;" />
+
+          <p style="color:#64748b;font-size:12px;text-align:center;line-height:1.5;">
+            Estás recibiendo este correo porque te registraste en ContentFlow AI.<br />
+            Si tienes dudas, escríbenos directamente a <a href="mailto:juanglopezh@gmail.com" style="color:#a855f7;text-decoration:none;">juanglopezh@gmail.com</a>
+          </p>
+        </div>
+      `,
+    });
+    console.log(`[Email] Welcome email sent to ${userEmail}`);
+  } catch (err) {
+    console.error("[Email] Welcome email sending error:", err);
+  }
+}

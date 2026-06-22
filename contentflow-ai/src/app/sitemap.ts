@@ -47,7 +47,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   } catch (error) {
     console.error("Error generating sitemap blog entries:", error);
-    // Add mock post slugs as fallback in case of Firestore absence
     const fallbackSlugs = [
       "inteligencia-artificial-redefiniendo-copywriting",
       "5-estrategias-virales-crecer-linkedin-automatizado",
@@ -61,6 +60,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       });
     });
+  }
+
+  // Load SEO programmatic pages
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const seoDir = path.join(process.cwd(), 'src', 'content', 'seo');
+    if (fs.existsSync(seoDir)) {
+      const files = fs.readdirSync(seoDir);
+      for (const file of files) {
+        if (file.endsWith('.json')) {
+          const slug = file.replace('.json', '');
+          routes.push({
+            url: `${base}/tools/${slug}`,
+            lastModified: now,
+            changeFrequency: "daily",
+            priority: 0.8,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error generating sitemap SEO entries:", error);
   }
 
   return routes;

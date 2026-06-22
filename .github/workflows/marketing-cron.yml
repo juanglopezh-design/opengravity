@@ -1,0 +1,60 @@
+name: Autonomous Marketing Engine
+
+on:
+  schedule:
+    # Run every day at 08:00 UTC
+    - cron: '0 8 * * *'
+  # Allow manual trigger from the GitHub Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write # Needed to commit SEO files back to the repo
+
+jobs:
+  run-marketing-scripts:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./contentflow-ai
+        run: npm ci
+
+      - name: Run SEO Generator
+        working-directory: ./contentflow-ai
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node scripts/seo-generator.mjs
+
+      - name: Run Cold Email Bot
+        working-directory: ./contentflow-ai
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }} # Uncomment if using real emails
+        run: node scripts/cold-email-bot.mjs
+
+      - name: Run Social Media Bot
+        working-directory: ./contentflow-ai
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }} # Future use
+        run: node scripts/social-media-bot.mjs
+        continue-on-error: true # Don't fail the whole job if the bot fails to post
+
+      - name: Commit Generated SEO Content
+        run: |
+          git config --global user.name "Autonomous Marketing Bot"
+          git config --global user.email "bot@contentflow.ai"
+          git add contentflow-ai/src/content/seo/ contentflow-ai/marketing_output/ || true
+          # Only commit if there are changes
+          git diff --staged --quiet || git commit -m "chore: auto-generate SEO content and update leads log [skip ci]"
+          git push origin main || echo "No changes to push or branch is different"

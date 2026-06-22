@@ -4,9 +4,9 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
-      // Allow users to create their own doc upon signup, ensuring they default to 'free' plan
+      // Allow users to create their own doc upon signup, supporting both pending and free plan defaults
       allow create: if request.auth != null && request.auth.uid == userId 
-                    && request.resource.data.plan == 'free'
+                    && (request.resource.data.plan == 'pending' || request.resource.data.plan == 'free')
                     && request.resource.data.generationsUsed == 0;
       // Disallow user from updating their own document to prevent tampering with plan/credits
       allow update: if false;
@@ -17,6 +17,11 @@ service cloud.firestore {
         // History is written by the server API, so client writes are disabled
         allow write: if false;
       }
+    }
+
+    match /commissions/{commissionId} {
+      allow read: if request.auth != null && resource.data.referrerId == request.auth.uid;
+      allow write: if false;
     }
   }
 }

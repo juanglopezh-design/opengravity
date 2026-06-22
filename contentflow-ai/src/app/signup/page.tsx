@@ -24,14 +24,26 @@ function SignupForm() {
     const userRef = doc(db, "users", uid);
     const userSnap = await getDoc(userRef);
     if (!userSnap.exists()) {
+      let referredBy: string | null = null;
+      if (typeof window !== "undefined") {
+        referredBy = window.localStorage.getItem("referredBy");
+      }
       await setDoc(userRef, {
         name: displayName,
         email: userEmail,
         plan: "pending",       // no active plan until payment confirmed
         generationsUsed: 0,
         generationsLimit: 0,   // zero until paid
+        referredBy: referredBy || null,
         createdAt: serverTimestamp(),
       });
+
+      // Send onboarding email asynchronously (fire-and-forget)
+      fetch("/api/marketing/signup-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail, name: displayName }),
+      }).catch((err) => console.error("Error triggering welcome email:", err));
     }
   };
 

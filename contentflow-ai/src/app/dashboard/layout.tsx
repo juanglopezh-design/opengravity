@@ -5,7 +5,7 @@ import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import Link from "next/link";
 import styles from "./layout.module.css";
-import { LayoutDashboard, History, Settings, LogOut, Sparkles } from "lucide-react";
+import { LayoutDashboard, History, Settings, LogOut, Sparkles, Megaphone, Users } from "lucide-react";
 import { UserDataProvider, useUserData } from "./UserDataContext";
 import { isUnlimitedPlan } from "@/lib/config";
 import { useLanguage } from "@/context/LanguageContext";
@@ -70,6 +70,20 @@ function DashboardShell({ user, children }: { user: User; children: React.ReactN
           >
             <History size={20} />
             <span>{t("sidebar.history")}</span>
+          </Link>
+          <Link
+            href="/dashboard/marketing"
+            className={`${styles.navItem} ${pathname === "/dashboard/marketing" ? styles.active : ""}`}
+          >
+            <Megaphone size={20} />
+            <span>{t("sidebar.marketing")}</span>
+          </Link>
+          <Link
+            href="/dashboard/affiliates"
+            className={`${styles.navItem} ${pathname === "/dashboard/affiliates" ? styles.active : ""}`}
+          >
+            <Users size={20} />
+            <span>{t("sidebar.affiliates")}</span>
           </Link>
           <Link
             href="/dashboard/settings"

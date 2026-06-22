@@ -42,3 +42,32 @@ export function checkRateLimit(uid: string): RateLimitResult {
   entry.count += 1;
   return { allowed: true };
 }
+
+const ipStore = new Map<string, RateLimitEntry>();
+const IP_WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+const IP_MAX_REQUESTS = 3;               // max 3 free demo generations per day
+
+// Periodically clean up ipStore to prevent leaks
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of ipStore.entries()) {
+    if (entry.resetAt < now) ipStore.delete(key);
+  }
+}, 30 * 60 * 1000);
+
+export function checkIpRateLimit(ip: string): RateLimitResult & { remaining: number } {
+  const now = Date.now();
+  const entry = ipStore.get(ip);
+
+  if (!entry || entry.resetAt < now) {
+    ipStore.set(ip, { count: 1, resetAt: now + IP_WINDOW_MS });
+    return { allowed: true, remaining: IP_MAX_REQUESTS - 1 };
+  }
+
+  if (entry.count >= IP_MAX_REQUESTS) {
+    return { allowed: false, retryAfterMs: entry.resetAt - now, remaining: 0 };
+  }
+
+  entry.count += 1;
+  return { allowed: true, remaining: IP_MAX_REQUESTS - entry.count };
+}
