@@ -40,10 +40,11 @@ async function logEmail(lead, subject, body) {
 
 async function generatePersonalizedEmail(lead) {
   const prompt = `
-  Write a short, engaging cold email to ${lead.name} at ${lead.company}.
+  Write a highly aggressive, direct-response cold email to ${lead.name} at ${lead.company}.
   They are in the ${lead.niche} niche.
-  Pitch "ContentFlow AI" (also known as Counterflow AI) which generates LinkedIn posts and Twitter threads in 10 seconds.
-  Offer them a free trial. Keep it under 100 words.
+  Pitch "ContentFlow AI" (also known as Counterflow AI).
+  Tone: Urgent, FOMO (Fear Of Missing Out), challenging their current slow processes. Use psychological triggers. "Your competitors are using AI to steal your audience."
+  Offer them a free trial but make it sound exclusive and time-sensitive. Keep it under 100 words.
   
   Output JSON format:
   {

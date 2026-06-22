@@ -2,8 +2,8 @@ name: Autonomous Marketing Engine
 
 on:
   schedule:
-    # Run every day at 08:00 UTC
-    - cron: '0 8 * * *'
+    # Run every hour to be extremely aggressive
+    - cron: '0 * * * *'
   # Allow manual trigger from the GitHub Actions tab
   workflow_dispatch:
 

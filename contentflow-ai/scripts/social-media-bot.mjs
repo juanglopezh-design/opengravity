@@ -23,8 +23,9 @@ async function generateViralThread() {
   ContentFlow AI is a SaaS that generates viral content, LinkedIn posts, and emails in 10 seconds using Gemini AI.
   It also features private Bitcoin checkout.
   
-  The tone should be "building in public", engaging, and targeted at content creators, marketers, and indie hackers.
-  Include a call to action to visit: https://contentflow-ai-juang26.web.app
+  The tone must be highly aggressive, controversial, bold, and unapologetic. Call out people who are still wasting hours writing content manually.
+  Use strong hooks. Make them feel they are falling behind if they don't use ContentFlow AI.
+  Include a strong, urgent call to action to visit: https://contentflow-ai-juang26.web.app
   
   Output the result as a JSON array of strings, where each string is a tweet.
   Keep each tweet under 280 characters.
