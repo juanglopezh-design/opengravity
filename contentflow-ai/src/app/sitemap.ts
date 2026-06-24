@@ -1,4 +1,6 @@
 import { MetadataRoute } from "next";
+import fs from "fs";
+import path from "path";
 import { siteUrl } from "@/lib/config";
 import { adminDb } from "@/lib/firebase-admin";
 
@@ -45,8 +47,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       });
     });
-  } catch (error) {
-    console.error("Error generating sitemap blog entries:", error);
+  } catch {
+    console.error("Error generating sitemap blog entries.");
     const fallbackSlugs = [
       "inteligencia-artificial-redefiniendo-copywriting",
       "5-estrategias-virales-crecer-linkedin-automatizado",
@@ -64,8 +66,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Load SEO programmatic pages
   try {
-    const fs = require('fs');
-    const path = require('path');
     const seoDir = path.join(process.cwd(), 'src', 'content', 'seo');
     if (fs.existsSync(seoDir)) {
       const files = fs.readdirSync(seoDir);
@@ -81,10 +81,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         }
       }
     }
-  } catch (error) {
-    console.error("Error generating sitemap SEO entries:", error);
+  } catch {
+    console.error("Error generating sitemap SEO entries.");
   }
 
   return routes;
 }
-

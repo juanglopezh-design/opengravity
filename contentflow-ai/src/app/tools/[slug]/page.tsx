@@ -5,8 +5,8 @@ import Link from 'next/link';
 
 // We could use a proper markdown parser like react-markdown, but we'll use a simple layout for now.
 
-export async function generateMetadata({ params }) {
-  const slug = params.slug;
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const filePath = path.join(process.cwd(), 'src', 'content', 'seo', `${slug}.json`);
   
   try {
@@ -16,28 +16,28 @@ export async function generateMetadata({ params }) {
       title: `${data.title} | ContentFlow AI`,
       description: data.metaDescription,
     };
-  } catch (error) {
+  } catch {
     return {
       title: 'Tool Not Found',
     };
   }
 }
 
-export default async function ToolPage({ params }) {
-  const slug = params.slug;
+export default async function ToolPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const filePath = path.join(process.cwd(), 'src', 'content', 'seo', `${slug}.json`);
   
   let data;
   try {
     const fileContent = await fs.readFile(filePath, 'utf-8');
     data = JSON.parse(fileContent);
-  } catch (error) {
+  } catch {
     notFound();
   }
 
   // Very simple markdown rendering for h2 and links
   const renderContent = (markdown) => {
-    let html = markdown
+    const html = markdown
       .replace(/## (.*)/g, '<h2 class="text-2xl font-bold mt-8 mb-4 text-white">$1</h2>')
       .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-[#00FF9D] hover:underline">$1</a>')
       .replace(/\n/g, '<br/>');

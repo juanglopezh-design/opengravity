@@ -1,19 +1,19 @@
-name: Autonomous Marketing Engine
+name: Autonomous Marketing Engine v2
 
 on:
   schedule:
-    # Run every hour to be extremely aggressive
-    - cron: '0 * * * *'
-  # Allow manual trigger from the GitHub Actions tab
+    # Every 6 hours — aggressive but sustainable
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 permissions:
-  contents: write # Needed to commit SEO files back to the repo
+  contents: write
 
 jobs:
-  run-marketing-scripts:
+  run-marketing:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 15
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,36 +25,46 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install contentflow-ai dependencies
         working-directory: ./contentflow-ai
         run: npm ci
 
-      - name: Run SEO Generator
+      - name: Run Autonomous Marketing Engine
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: contentflow-ai-juang26
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ALLOWED_USER_IDS: ${{ secrets.TELEGRAM_ALLOWED_USER_IDS }}
+        run: node marketing_engine.mjs --once
+
+      - name: Run SEO Generator (contentflow-ai)
         working-directory: ./contentflow-ai
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: node scripts/seo-generator.mjs
+        continue-on-error: true
 
-      - name: Run Cold Email Bot
+      - name: Run Lead Scraper (contentflow-ai)
+        working-directory: ./contentflow-ai
+        run: node scripts/lead-scraper.mjs
+        continue-on-error: true
+
+      - name: Run Social Media Bot (contentflow-ai)
         working-directory: ./contentflow-ai
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }} # Uncomment if using real emails
-        run: node scripts/cold-email-bot.mjs
-
-      - name: Run Social Media Bot
-        working-directory: ./contentflow-ai
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          # TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }} # Future use
         run: node scripts/social-media-bot.mjs
-        continue-on-error: true # Don't fail the whole job if the bot fails to post
+        continue-on-error: true
 
-      - name: Commit Generated SEO Content
+      - name: Commit Generated Content
         run: |
-          git config --global user.name "Autonomous Marketing Bot"
+          git config --global user.name "ContentFlow AI Marketing Bot"
           git config --global user.email "bot@contentflow.ai"
-          git add contentflow-ai/src/content/seo/ contentflow-ai/marketing_output/ || true
-          # Only commit if there are changes
-          git diff --staged --quiet || git commit -m "chore: auto-generate SEO content and update leads log [skip ci]"
-          git push origin main || echo "No changes to push or branch is different"
+          git add contentflow-ai/src/content/seo/ contentflow-ai/marketing_output/ marketing_engine_log.jsonl || true
+          git diff --staged --quiet || git commit -m "chore(marketing): auto-generate SEO content and campaigns [skip ci]"
+          git push origin main || echo "Nothing to push"
