@@ -36,7 +36,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
   }
 
   // Very simple markdown rendering for h2 and links
-  const renderContent = (markdown) => {
+  const renderContent = (markdown: string) => {
     const html = markdown
       .replace(/## (.*)/g, '<h2 class="text-2xl font-bold mt-8 mb-4 text-white">$1</h2>')
       .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-[#00FF9D] hover:underline">$1</a>')
