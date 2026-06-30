@@ -54,5 +54,12 @@
     "email": "development@venveo.com",
     "niche": "marketing agency",
     "source": "GitHub Public Profiles"
+  },
+  {
+    "name": "Lovstudio AI",
+    "company": "Indie Hacker / Startup",
+    "email": "founder@lovstudio.ai",
+    "niche": "founder",
+    "source": "GitHub Public Profiles"
   }
 ]
