@@ -61,5 +61,12 @@
     "email": "founder@lovstudio.ai",
     "niche": "founder",
     "source": "GitHub Public Profiles"
+  },
+  {
+    "name": "Marketinguys",
+    "company": "Indie Hacker / Startup",
+    "email": "info@marketinguys.com",
+    "niche": "marketing agency",
+    "source": "GitHub Public Profiles"
   }
 ]
