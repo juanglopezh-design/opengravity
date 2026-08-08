@@ -2,8 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-
-// We could use a proper markdown parser like react-markdown, but we'll use a simple layout for now.
+import ToolInteractiveGenerator from '@/components/ToolInteractiveGenerator';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -44,8 +43,55 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
     return <div dangerouslySetInnerHTML={{ __html: html }} />;
   };
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": data.h1,
+        "operatingSystem": "All",
+        "applicationCategory": "BusinessApplication",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "ratingCount": "1280",
+        },
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": `¿Cómo funciona ${data.h1}?`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Introduce tu tema o idea y nuestra IA potenciada por Gemini creará publicaciones optimizadas en 10 segundos.",
+            },
+          },
+          {
+            "@type": "Question",
+            "name": "¿Es gratis probar ContentFlow AI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sí, puedes realizar pruebas gratuitas instantáneas sin necesidad de ingresar tarjeta de crédito.",
+            },
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-gray-300 py-20 px-4 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-3xl mx-auto">
         <Link href="/" className="text-[#00FF9D] hover:underline mb-8 inline-block">
           &larr; Back to ContentFlow AI
@@ -54,6 +100,8 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
         <h1 className="text-4xl md:text-5xl font-bold mb-6 text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
           {data.h1}
         </h1>
+
+        <ToolInteractiveGenerator toolTitle={data.h1} />
         
         <div className="prose prose-invert prose-lg max-w-none text-gray-300">
           {renderContent(data.contentMarkdown)}

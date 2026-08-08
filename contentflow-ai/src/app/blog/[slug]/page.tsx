@@ -17,7 +17,8 @@ interface BlogPost {
   published: boolean;
 }
 
-export const revalidate = 60; // Revalidate every 60 seconds
+export const dynamic = "force-dynamic";
+
 
 // Mock articles data as fallback for local dev or missing Firestore data
 const mockArticles: Record<string, BlogPost> = {

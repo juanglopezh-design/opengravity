@@ -14,8 +14,9 @@ interface BlogPost {
   published: boolean;
 }
 
-// Ensure the page is dynamic so it reads the latest blog posts from Firestore on every request.
-export const revalidate = 60; // Revalidate every 60 seconds
+// Ensure the page is generated dynamically on demand to prevent build-time Firestore network timeouts on Render.
+export const dynamic = "force-dynamic";
+
 
 async function getBlogPosts(): Promise<BlogPost[]> {
   try {

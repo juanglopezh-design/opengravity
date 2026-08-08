@@ -5,7 +5,7 @@ import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import Link from "next/link";
 import styles from "./layout.module.css";
-import { LayoutDashboard, History, Settings, LogOut, Sparkles, Megaphone, Users } from "lucide-react";
+import { LayoutDashboard, History, Settings, LogOut, Sparkles, Megaphone, Users, Share2 } from "lucide-react";
 import { UserDataProvider, useUserData } from "./UserDataContext";
 import { isUnlimitedPlan } from "@/lib/config";
 import { useLanguage } from "@/context/LanguageContext";
@@ -63,6 +63,13 @@ function DashboardShell({ user, children }: { user: User; children: React.ReactN
           >
             <LayoutDashboard size={20} />
             <span>{t("sidebar.generator")}</span>
+          </Link>
+          <Link
+            href="/dashboard/repurpose"
+            className={`${styles.navItem} ${pathname === "/dashboard/repurpose" ? styles.active : ""}`}
+          >
+            <Share2 size={20} />
+            <span>1-Click Omnicanal</span>
           </Link>
           <Link
             href="/dashboard/history"

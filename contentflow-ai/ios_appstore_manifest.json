@@ -1,0 +1,22 @@
+{
+  "app_store_info": {
+    "app_name": "ContentFlow AI: Viral Generator",
+    "subtitle": "AI Content & Social Copywriter",
+    "bundle_id": "com.contentflowai.app",
+    "primary_category": "Productivity",
+    "secondary_category": "Business",
+    "content_rating": "4+",
+    "support_url": "https://contentflow-ai-juang26.web.app/help",
+    "marketing_url": "https://contentflow-ai-juang26.web.app",
+    "privacy_policy_url": "https://contentflow-ai-juang26.web.app/privacy",
+    "keywords": "ai,content creator,copywriting,viral,social media,generator,marketing,gemini,post",
+    "description": "ContentFlow AI es la herramienta definitiva impulsada por inteligencia artificial para creadores de contenido, emprendedores y marcas que buscan multiplicar su alcance en redes sociales.\n\nCaracterísticas principales:\n- Generación de artículos y posts virales en segundos con Gemini AI.\n- Conversión de contenido a hilos de Twitter, posts de LinkedIn y guiones.\n- Optimización SEO automática e historial guardado en la nube.\n- Diseñado para máxima velocidad y productividad.",
+    "promotional_text": "Crea contenido viral 10x más rápido con el poder de la Inteligencia Artificial."
+  },
+  "required_screenshots_resolutions": [
+    "6.7 inch (iPhone 16 Pro Max / 15 Pro Max) - 1290 x 2796 px",
+    "6.5 inch (iPhone 11 Pro Max / XS Max) - 1242 x 2688 px",
+    "5.5 inch (iPhone 8 Plus / 7 Plus) - 1242 x 2208 px",
+    "12.9 inch iPad Pro (6th Gen) - 2048 x 2732 px"
+  ]
+}

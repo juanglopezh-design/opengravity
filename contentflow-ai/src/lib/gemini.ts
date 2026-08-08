@@ -66,3 +66,40 @@ Reglas:
     throw new Error("No se pudo generar el contenido. Inténtalo de nuevo.");
   }
 }
+
+export async function repurposeContent(prompt: string, language: string = "Español") {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("API key no configurada");
+  }
+
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    generationConfig: {
+      maxOutputTokens: 3000,
+      temperature: 0.7,
+      responseMimeType: "application/json",
+    },
+  });
+
+  const systemPrompt = `Eres un estratega de contenido omnichannel. Transforma la idea/texto del usuario en un paquete completo de 4 contenidos optimizados para diferentes plataformas.
+Idioma: ${language}
+
+Debes responder en formato JSON estricto con las siguientes claves:
+{
+  "linkedin": "Post profesional de LinkedIn con hooks, emojis y estructura clara.",
+  "twitter": "Hilo de Twitter/X (3 a 5 tweets separados por 🧵).",
+  "tiktok": "Guión de video corto (TikTok/Shorts) con [Hook], [Visual] y [Voz en off].",
+  "email": "Asunto y cuerpo de email newsletter de alta conversión."
+}`;
+
+  try {
+    const result = await model.generateContent(`${systemPrompt}\n\nIdea del usuario:\n${prompt}`);
+    const response = await result.response;
+    const jsonText = response.text();
+    return JSON.parse(jsonText);
+  } catch (error) {
+    console.error("Error repurposing content:", error);
+    throw new Error("No se pudo reprocesar el contenido.");
+  }
+}
+

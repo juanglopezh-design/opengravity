@@ -1,0 +1,15 @@
+{
+  "appId": "com.contentflowai.app",
+  "appName": "ContentFlow AI",
+  "webDir": "out",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://contentflow-ai-juang26.web.app",
+    "cleartext": true
+  },
+  "ios": {
+    "contentInset": "always",
+    "allowsLinkPreview": false,
+    "scrollEnabled": true
+  }
+}

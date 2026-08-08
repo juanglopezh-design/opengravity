@@ -21,10 +21,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const snapshot = await adminDb
-      .collection("blog_posts")
-      .where("published", "==", true)
-      .get();
+    const fetchWithTimeout = Promise.race([
+      adminDb.collection("blog_posts").where("published", "==", true).get(),
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Firestore sitemap timeout")), 3000)
+      ),
+    ]);
+
+    const snapshot = await fetchWithTimeout;
 
     snapshot.forEach((doc) => {
       const data = doc.data();
