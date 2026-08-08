@@ -1,4 +1,4 @@
-const BASE_URL = process.env.RENDER_URL || "https://contentflow-ai-ex6w.onrender.com";
+const BASE_URL = process.env.RENDER_URL || "https://contentflow-ai-9wy7.onrender.com";
 const TIMEOUT_MS = 45000;
 
 async function safeJson(res) {
