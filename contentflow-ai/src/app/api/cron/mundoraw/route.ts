@@ -16,7 +16,8 @@ export const maxDuration = 60; // 60s timeout for AI generation
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || "AIzaSyCQGIg3to6hT1611AMg3LtOYsExYA8DGXA";
 const CHANNEL_ID      = "UCsjCN2ZNwlbFIUWw8omIeiQ";
-const STATE_KEY       = "mundoraw_published_ids"; // stored in-memory (resets on redeploy)
+// In-memory state key (unused directly — kept for documentation)
+// const STATE_KEY = "mundoraw_published_ids";
 
 // In-memory state (persists across requests in same process)
 const publishedIds = new Set<string>();
@@ -133,7 +134,7 @@ async function postToTwitter(content: any): Promise<any> {
     .join("&");
 
   const baseStr = ["POST", encodeURIComponent(url), encodeURIComponent(paramStr)].join("&");
-  const sigKey = `${encodeURIComponent(TWITTER_API_SECRET!!)}&${encodeURIComponent(TWITTER_ACCESS_SECRET!!)}`;
+  const sigKey = `${encodeURIComponent(TWITTER_API_SECRET as string)}&${encodeURIComponent(TWITTER_ACCESS_SECRET as string)}`;
   oauthParams.oauth_signature = createHmac("sha1", sigKey).update(baseStr).digest("base64");
 
   const authHeader = "OAuth " + Object.keys(oauthParams).sort()
