@@ -49,6 +49,24 @@ export async function register() {
     }
   }
 
+  // MundoRaw AutoPublish — corre cada hora
+  const MUNDORAW_INTERVAL_MS = 60 * 60 * 1000; // 1 hora
+  const MUNDORAW_URL = `${SELF_URL}/api/cron/mundoraw`;
+  const CRON_SECRET = process.env.CRON_SECRET || "";
+
+  async function mundorawCheck() {
+    try {
+      const headers: Record<string, string> = { "User-Agent": "ContentFlow-Cron/1.0" };
+      if (CRON_SECRET) headers["authorization"] = `Bearer ${CRON_SECRET}`;
+      const res = await fetch(MUNDORAW_URL, { method: "GET", cache: "no-store", headers });
+      const data = await res.json();
+      console.log(`[MundoRaw] Check: ${data.status} | ${data.count ?? 0} nuevo(s) | ${new Date().toISOString()}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[MundoRaw] Check falló: ${msg}`);
+    }
+  }
+
   // Esperar 30 segundos después del arranque antes del primer ping
   // (dar tiempo a que el servidor esté completamente listo)
   setTimeout(() => {
@@ -57,5 +75,12 @@ export async function register() {
     console.log(
       `[KeepAlive] Loop iniciado — ping cada ${PING_INTERVAL_MS / 60000} min → ${PING_URL}`
     );
+
+    // MundoRaw: primer check a los 5 minutos, luego cada hora
+    setTimeout(() => {
+      mundorawCheck();
+      setInterval(mundorawCheck, MUNDORAW_INTERVAL_MS);
+      console.log(`[MundoRaw] AutoPublish iniciado — check cada hora → ${MUNDORAW_URL}`);
+    }, 5 * 60 * 1000);
   }, 30_000);
 }
