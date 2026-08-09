@@ -220,7 +220,7 @@ export async function GET(request: Request) {
 
     const newVideos = isForce
       ? [videos[0]]
-      : videos.filter(v => !publishedIds.has(v.id));
+      : videos.filter((v: any) => !publishedIds.has(v.id));
 
     if (!newVideos.length) {
       return NextResponse.json({
