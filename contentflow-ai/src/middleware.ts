@@ -30,6 +30,10 @@ function corsHeaders(origin: string | null): Headers {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  if (pathname === "/api/health") {
+    return NextResponse.next();
+  }
+
   // ── CORS for API routes ──────────────────────────────────────────────────
   if (pathname.startsWith("/api/")) {
     const origin = request.headers.get("origin");

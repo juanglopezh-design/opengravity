@@ -111,6 +111,9 @@ const defaultApp = admin.apps.length > 0
   : admin.initializeApp({ projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "contentflow-ai-juang26" });
 
 export const adminDb = admin.firestore(defaultApp);
+try {
+  adminDb.settings({ ignoreUndefinedProperties: true, preferRest: true });
+} catch {}
 export const adminAuth = admin.auth(defaultApp);
 
 

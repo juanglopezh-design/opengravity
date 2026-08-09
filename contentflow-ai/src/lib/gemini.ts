@@ -29,7 +29,7 @@ export async function generateContent(
   const safeType = ALLOWED_TYPES.includes(type) ? type : "Contenido general";
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
+    model: "gemini-1.5-flash",
     generationConfig: {
       maxOutputTokens: 2048,
       temperature: 0.8,
@@ -73,7 +73,7 @@ export async function repurposeContent(prompt: string, language: string = "Espa√
   }
 
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
+    model: "gemini-1.5-flash",
     generationConfig: {
       maxOutputTokens: 3000,
       temperature: 0.7,
