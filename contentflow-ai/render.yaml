@@ -2,13 +2,33 @@ services:
   - type: web
     name: contentflow-ai
     runtime: node
+    region: oregon
     plan: free
-    rootDir: contentflow-ai
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --frozen-lockfile && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
-      - key: NODE_VERSION
-        value: 20.18.0
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://contentflow-ai-9wy7.onrender.com
+      - key: NEXT_PUBLIC_API_URL
+        value: https://contentflow-ai-9wy7.onrender.com
+      - key: NEXT_PUBLIC_FIREBASE_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: NEXT_PUBLIC_FIREBASE_APP_ID
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT
+        sync: false

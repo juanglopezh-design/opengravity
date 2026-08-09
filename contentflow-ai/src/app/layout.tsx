@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
 import ReferralTracker from "@/components/ReferralTracker";
+import KeepAlive from "@/components/KeepAlive";
 
 import { siteUrl } from "@/lib/config";
 const siteTitle = "ContentFlow AI";
@@ -89,6 +90,7 @@ export default function RootLayout({
       </head>
       <body>
         <LanguageProvider>
+          <KeepAlive />
           <ReferralTracker />
           {children}
         </LanguageProvider>
