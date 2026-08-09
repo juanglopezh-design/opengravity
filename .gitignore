@@ -10,3 +10,5 @@ firebase_login_utf8.txt
 deploy_error.txt
 build_errors.txt
 build_errors_utf8.txt
+
+package-lock.json
