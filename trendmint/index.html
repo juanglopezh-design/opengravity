@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrendMint — Invierte en Tendencias Antes de que Exploten</title>
+  <meta name="description" content="La primera plataforma mundial donde puedes invertir en tendencias culturales emergentes antes de que se vuelvan mainstream." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">TrendMint</span>
+        <span class="logo-badge">PRO</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#trending">Tendencias</a></li>
+        <li><a href="#scanner">Escáner IA</a></li>
+        <li><a href="#how">Cómo Funciona</a></li>
+        <li><a href="#leaderboard">Ranking</a></li>
+        <li><a href="#pricing">Planes</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="btn-wallet" id="btn-portfolio">
+          <span class="wallet-icon">💼</span>
+          <span id="user-balance-usd">$10,000 USD</span>
+        </button>
+        <button class="btn-ghost" id="btn-login">Iniciar Sesión</button>
+        <button class="btn-primary" id="btn-signup">Empezar Gratis</button>
+      </div>
+      <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <canvas id="particles-canvas"></canvas>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge animate-fade-up">
+        <span class="badge-dot"></span>
+        <span id="hero-badge-text">🔥 142 tendencias detectadas hoy · 24 nuevas en la última hora</span>
+      </div>
+      <h1 class="hero-title animate-fade-up delay-1">
+        Invierte en el<br />
+        <span class="gradient-text">Futuro Cultural</span><br />
+        antes de que explote
+      </h1>
+      <p class="hero-sub animate-fade-up delay-2">
+        TrendMint es la primera plataforma mundial donde compras participaciones en 
+        tendencias emergentes. Si la tendencia explota en redes, <strong>tú ganas dinero real</strong>.
+      </p>
+      <div class="hero-cta animate-fade-up delay-3">
+        <button class="btn-hero" id="btn-hero-start">
+          <span>⚡ Probar Escáner IA Gratis</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <button class="btn-watch" id="btn-watch">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+          Ver Demo en Vivo
+        </button>
+      </div>
+      <div class="hero-stats animate-fade-up delay-4">
+        <div class="stat-item">
+          <div class="stat-value counter" data-target="52410">0</div>
+          <div class="stat-label">Minters Activos</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value"><span class="counter" data-target="3820">0</span>K</div>
+          <div class="stat-label">TrendCoins Circulando</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-value">+<span class="counter" data-target="412">0</span>%</div>
+          <div class="stat-label">ROI Promedio Top Minters</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ── TICKER ── -->
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="ticker-track">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+
+  <!-- ── LIVE TRENDING ── -->
+  <section class="trending-section" id="trending">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">🔥 MERCADO EN VIVO</div>
+        <h2 class="section-title">Tendencias <span class="gradient-text">Emergentes</span></h2>
+        <p class="section-sub">Señales detectadas por IA en tiempo real. Selecciona una tendencia para analizar su gráfica e invertir.</p>
+      </div>
+
+      <!-- SEARCH & CONTROLS -->
+      <div class="controls-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="trend-search" placeholder="Buscar por idea, tecnología o etiqueta..." class="search-input" />
+        </div>
+        <div class="sort-wrap">
+          <label for="sort-select">Ordenar:</label>
+          <select id="sort-select" class="sort-select">
+            <option value="score">Mayor TrendScore™</option>
+            <option value="change">Mayor Crecimiento (+%)</option>
+            <option value="recent">Más Reciente</option>
+            <option value="price_asc">Precio Menor</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="trend-filters">
+        <button class="filter-btn active" data-filter="all">Todas</button>
+        <button class="filter-btn" data-filter="tech">🤖 Tech</button>
+        <button class="filter-btn" data-filter="culture">🎨 Cultura</button>
+        <button class="filter-btn" data-filter="food">🍜 Food</button>
+        <button class="filter-btn" data-filter="fashion">👗 Fashion</button>
+        <button class="filter-btn" data-filter="finance">💰 Finance</button>
+        <button class="filter-btn" data-filter="custom">🌟 Creadas por Usuarios</button>
+      </div>
+
+      <div class="trends-grid" id="trends-grid">
+        <!-- Injected by JS -->
+      </div>
+
+      <div class="load-more-wrap">
+        <button class="btn-load-more" id="load-more">Cargar más tendencias <span class="arrow-down">↓</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── INTERACTIVE AI SCANNER SECTION ── -->
+  <section class="scanner-section" id="scanner">
+    <div class="container">
+      <div class="scanner-card">
+        <div class="section-tag">⚡ ESCÁNER DE TENDENCIAS EN TIEMPO REAL</div>
+        <h2 class="section-title">¿Tienes una idea? <br /><span class="gradient-text">Calcula su TrendScore™ con IA</span></h2>
+        <p class="section-sub">Escribe cualquier tendencia emergente que hayas visto en internet o en la calle. Nuestra IA simulará su potencial viral e índice de rentabilidad.</p>
+        
+        <div class="scanner-input-box">
+          <input type="text" id="scanner-input" placeholder="Ej: Café frío nitrogenado con colágeno en Medellín..." class="scanner-input" />
+          <button class="btn-hero" id="btn-scan-now">
+            <span>🧠 Escanear Idea</span>
+          </button>
+        </div>
+
+        <!-- SCANNING ANIMATION STATE -->
+        <div class="scanner-loading" id="scanner-loading" style="display:none;">
+          <div class="radar-circle">
+            <div class="radar-sweep"></div>
+          </div>
+          <div class="scanner-status-text" id="scanner-status-text">Escaneando señales en TikTok, X, Reddit y Google Trends...</div>
+        </div>
+
+        <!-- SCAN RESULT DISPLAY -->
+        <div class="scanner-result" id="scanner-result" style="display:none;">
+          <div class="res-header">
+            <div class="res-title" id="res-title">Café Nitro con Colágeno</div>
+            <div class="res-score-badge" id="res-score-badge">TrendScore: 89/100</div>
+          </div>
+          <div class="res-metrics">
+            <div class="metric-box">
+              <span class="m-label">Potencial Viral</span>
+              <span class="m-val" id="res-viral">🚀 Muy Alto (+420%)</span>
+            </div>
+            <div class="metric-box">
+              <span class="m-label">Ventana Oportunidad</span>
+              <span class="m-val" id="res-window">⏱️ 3 a 6 meses</span>
+            </div>
+            <div class="metric-box">
+              <span class="m-label">Precio Inicial Mint</span>
+              <span class="m-val" id="res-price">🪙 0.25 TC</span>
+            </div>
+            <div class="metric-box">
+              <span class="m-label">Nivel de Riesgo</span>
+              <span class="m-val" id="res-risk">🟢 Bajo (Early Adopters)</span>
+            </div>
+          </div>
+          <p class="res-summary" id="res-summary"></p>
+          <div class="res-actions">
+            <button class="btn-hero" id="btn-mint-scanned">🪙 Mintear y Agregar al Mercado Mercado en Vivo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section class="how-section" id="how">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">💡 EL MODELO DE NEGOCIO</div>
+        <h2 class="section-title">¿Cómo funciona<br /><span class="gradient-text">TrendMint</span>?</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card" data-step="01">
+          <div class="step-icon">🔮</div>
+          <h3>1. La IA Detecta</h3>
+          <p>Modelos neuronales escanean patrones de crecimiento en redes, Spotify, GitHub y búsquedas globales. Detectamos movimientos 3 semanas antes del boom.</p>
+          <div class="step-shine"></div>
+        </div>
+        <div class="step-card" data-step="02">
+          <div class="step-icon">🪙</div>
+          <h3>2. Tú Minteas</h3>
+          <p>Adquieres "TrendCoins" de esa idea específica desde $1 USD. Comprar temprano asegura el menor precio de entrada.</p>
+          <div class="step-shine"></div>
+        </div>
+        <div class="step-card" data-step="03">
+          <div class="step-icon">📈</div>
+          <h3>3. La Idea se Propaga</h3>
+          <p>Cuando la tendencia llega a marcas y medios masivos, la demanda por sus TrendCoins se dispara orgánicamente.</p>
+          <div class="step-shine"></div>
+        </div>
+        <div class="step-card" data-step="04">
+          <div class="step-icon">💸</div>
+          <h3>4. Cobras Ganancias</h3>
+          <p>Vendes tus participaciones en el mercado o ejecutas tu toma de ganancias. Retiras tu saldo a tu banco o crypto wallet instante.</p>
+          <div class="step-shine"></div>
+        </div>
+      </div>
+
+      <div class="how-demo">
+        <div class="demo-card">
+          <div class="demo-label">📌 Ejemplo Real de Éxito Comercial</div>
+          <div class="demo-trend-name">🍵 Matcha Ceremonial en LATAM</div>
+          <div class="demo-timeline">
+            <div class="timeline-point detected">
+              <div class="tl-dot"></div>
+              <div class="tl-info">
+                <strong>TrendMint Detecta</strong>
+                <span>Señal inicial en TikTok Bogotá</span>
+                <span class="tl-price">🪙 0.12 TC ($0.12)</span>
+              </div>
+            </div>
+            <div class="timeline-line animated-line"></div>
+            <div class="timeline-point growing">
+              <div class="tl-dot"></div>
+              <div class="tl-info">
+                <strong>Explosión en Redes</strong>
+                <span>+340% crecimiento semanal</span>
+                <span class="tl-price">🪙 1.80 TC ($1.80)</span>
+              </div>
+            </div>
+            <div class="timeline-line animated-line"></div>
+            <div class="timeline-point exploded">
+              <div class="tl-dot"></div>
+              <div class="tl-info">
+                <strong>Mainstream Global 🚀</strong>
+                <span>Adopción masiva en cafeterías</span>
+                <span class="tl-price tl-price-big">🪙 14.70 TC <span class="gain">+12,150% ROI</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── AI SCORE METER ── -->
+  <section class="ai-section">
+    <div class="container">
+      <div class="ai-split">
+        <div class="ai-left">
+          <div class="section-tag">🧠 ALGORITMO PREDICTIVO</div>
+          <h2 class="section-title">TrendScore™<br /><span class="gradient-text">Big Data + IA</span></h2>
+          <p>Evaluamos más de 200 variables objetivas para darle una puntuación transparente a cada tendencia en tiempo real.</p>
+          <ul class="ai-features">
+            <li>
+              <span class="feat-icon">📡</span>
+              <div>
+                <strong>Tasa de Velocidad Viral</strong>
+                <span>Frecuencia y aceleración del volumen de menciones globales.</span>
+              </div>
+            </li>
+            <li>
+              <span class="feat-icon">🌍</span>
+              <div>
+                <strong>Curva de Adopción Geográfica</strong>
+                <span>Proyección de expansión de ciudades origen a mercados masivos.</span>
+              </div>
+            </li>
+            <li>
+              <span class="feat-icon">🎯</span>
+              <div>
+                <strong>Poder de Monetización</strong>
+                <span>Probabilidad de que el consumidor pague dinero real por la idea.</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div class="ai-right">
+          <div class="score-display" id="score-display">
+            <div class="score-ring-wrap">
+              <svg class="score-ring" viewBox="0 0 220 220">
+                <circle class="ring-bg" cx="110" cy="110" r="90" />
+                <circle class="ring-fill" id="ring-fill" cx="110" cy="110" r="90" />
+              </svg>
+              <div class="score-center">
+                <div class="score-number" id="score-number">0</div>
+                <div class="score-label-inner">TrendScore™</div>
+              </div>
+            </div>
+            <div class="score-meta">
+              <div class="score-trend-name" id="score-trend-name">Cargando...</div>
+              <div class="score-badges" id="score-badges"></div>
+              <button class="btn-mini" id="score-next">Siguiente tendencia →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── LEADERBOARD ── -->
+  <section class="leaderboard-section" id="leaderboard">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">🏆 RANKING GLOBAL DE MINTERS</div>
+        <h2 class="section-title">Los Minters <span class="gradient-text">Más Rentables</span></h2>
+        <p class="section-sub">Inversores reales que identificaron tendencias antes que los demás.</p>
+      </div>
+      <div class="leaderboard-table">
+        <div class="lb-header">
+          <span>#</span>
+          <span>Minter</span>
+          <span>Inversiones</span>
+          <span>Mayor ROI</span>
+          <span>Portfolio Total</span>
+          <span>Categoría</span>
+        </div>
+        <div id="lb-body">
+          <!-- JS Injected -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRICING ── -->
+  <section class="pricing-section" id="pricing">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">💎 SUSCRIPCIONES</div>
+        <h2 class="section-title">Elige tu Nivel de <span class="gradient-text">Acceso</span></h2>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-name">Explorer</div>
+          <div class="price-amount">$0<span>/mes</span></div>
+          <div class="price-desc">Ideal para empezar a explorar tendencias</div>
+          <ul class="price-features">
+            <li>✓ 3 Mints simulados al mes</li>
+            <li>✓ TrendScore™ básico</li>
+            <li>✓ Mercado en tiempo real</li>
+            <li class="disabled">✗ Escáner IA personal ilimitado</li>
+            <li class="disabled">✗ Alertas instantáneas en WhatsApp/Telegram</li>
+          </ul>
+          <button class="btn-price-ghost btn-trigger-signup">Empezar Gratis</button>
+        </div>
+        <div class="price-card featured">
+          <div class="price-badge-top">🔥 MÁS POPULAR</div>
+          <div class="price-name">Hunter Pro</div>
+          <div class="price-amount">$29<span>/mes</span></div>
+          <div class="price-desc">Para minters que quieren maximizar su ROI</div>
+          <ul class="price-features">
+            <li>✓ Mints e inversiones ilimitadas</li>
+            <li>✓ Escáner IA en tiempo real ilimitado</li>
+            <li>✓ Alertas de voz y push en tendencias nacientes</li>
+            <li>✓ Acceso anticipado (24h antes que la masa)</li>
+            <li>✓ Retiros prioritarios</li>
+          </ul>
+          <button class="btn-price-primary btn-trigger-signup">Probar 14 Días Gratis</button>
+        </div>
+        <div class="price-card">
+          <div class="price-name">Venture Whale</div>
+          <div class="price-amount">$199<span>/mes</span></div>
+          <div class="price-desc">Para fondos de inversión y creadores pro</div>
+          <ul class="price-features">
+            <li>✓ Todo de Hunter Pro</li>
+            <li>✓ API de datos TrendScore™ en vivo</li>
+            <li>✓ Reportes semanales ejecutivos en PDF</li>
+            <li>✓ Canal de trading privado en Discord</li>
+            <li>✓ Account Manager dedicado</li>
+          </ul>
+          <button class="btn-price-ghost btn-trigger-signup">Contactar Ventas</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CTA FINAL ── -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-inner">
+        <div class="cta-orb-1"></div>
+        <div class="cta-orb-2"></div>
+        <div class="section-tag">🚀 TU OPORTUNIDAD</div>
+        <h2 class="cta-title">La próxima tendencia millonaria<br /><span class="gradient-text">está naciendo ahora mismo</span></h2>
+        <p class="cta-sub">Únete a más de 52,000 minters de todo el mundo. Empieza a mintear en segundos.</p>
+        <div class="cta-input-row">
+          <input type="email" id="cta-email" placeholder="Ingresa tu correo electrónico..." class="cta-input" />
+          <button class="btn-hero" id="btn-cta-join">
+            <span>Crear mi Cuenta Gratis</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="nav-logo" style="margin-bottom:1rem">
+            <span class="logo-icon">◈</span>
+            <span class="logo-text">TrendMint</span>
+          </div>
+          <p>La plataforma pionera en monetización e inversión de tendencias culturales globales.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Plataforma</h4>
+          <a href="#trending">Mercado</a>
+          <a href="#scanner">Escáner IA</a>
+          <a href="#leaderboard">Ranking</a>
+          <a href="#pricing">Precios</a>
+        </div>
+        <div class="footer-col">
+          <h4>Comunidad</h4>
+          <a href="#">Discord Oficial</a>
+          <a href="#">X / Twitter</a>
+          <a href="#">Blog de Tendencias</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="#">Términos de Servicio</a>
+          <a href="#">Política de Privacidad</a>
+          <a href="#">Aviso de Riesgo</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 TrendMint Inc. Todos los derechos reservados.</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── MODAL: DETALLE Y TRADING DE TENDENCIA (CON GRÁFICO CANVAS) ── -->
+  <div class="modal-overlay" id="trade-modal-overlay">
+    <div class="modal-card modal-large">
+      <button class="modal-close" id="trade-modal-close">✕</button>
+      
+      <div class="trade-modal-header">
+        <div>
+          <span class="trend-category" id="tm-category">🤖 TECH</span>
+          <h2 class="tm-title" id="tm-title">Nombre de la Tendencia</h2>
+          <div class="tm-subtitle" id="tm-tags">#Tag1 #Tag2</div>
+        </div>
+        <div class="tm-score-box">
+          <span class="tm-score-val" id="tm-score">88</span>
+          <span class="tm-score-lbl">TrendScore™</span>
+        </div>
+      </div>
+
+      <!-- CHART AREA -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <span>📈 Gráfica de Precio (Últimos 7 días)</span>
+          <span class="chart-price-live" id="tm-live-price">🪙 0.34 TC</span>
+        </div>
+        <canvas id="price-chart-canvas" width="600" height="220"></canvas>
+      </div>
+
+      <!-- TRADING PANEL -->
+      <div class="trade-action-box">
+        <div class="trade-tabs">
+          <button class="trade-tab active" id="tab-buy">Comprar TC</button>
+          <button class="trade-tab" id="tab-sell">Vender TC</button>
+        </div>
+        <div class="trade-form">
+          <div class="trade-row">
+            <label>Cantidad (TrendCoins):</label>
+            <input type="number" id="trade-qty" value="10" min="1" max="1000" class="form-input" />
+          </div>
+          <div class="trade-calc">
+            <span>Total a Pagar / Recibir:</span>
+            <strong id="trade-total-usd">$3.40 USD</strong>
+          </div>
+          <button class="btn-hero w-full" id="btn-execute-trade">🪙 Ejecutar Orden de Compra</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL: PORTFOLIO DE USUARIO ── -->
+  <div class="modal-overlay" id="portfolio-modal-overlay">
+    <div class="modal-card modal-large">
+      <button class="modal-close" id="portfolio-modal-close">✕</button>
+      <div class="modal-icon">💼</div>
+      <h3 class="modal-title">Mi Portfolio de Inversiones</h3>
+      <p class="modal-sub">Resumen de tus TrendCoins compradas y rentabilidad actual.</p>
+
+      <div class="portfolio-stats-bar">
+        <div class="p-stat">
+          <span class="p-lbl">Saldo Disponible (USD):</span>
+          <strong class="p-val" id="port-cash">$10,000.00 USD</strong>
+        </div>
+        <div class="p-stat">
+          <span class="p-lbl">Valor en Tendencias:</span>
+          <strong class="p-val" id="port-invested">$0.00 USD</strong>
+        </div>
+        <div class="p-stat">
+          <span class="p-lbl">Ganancia Total (PnL):</span>
+          <strong class="p-val" id="port-pnl" style="color:var(--green)">+$0.00 (0%)</strong>
+        </div>
+      </div>
+
+      <div class="portfolio-table-wrap">
+        <table class="portfolio-table">
+          <thead>
+            <tr>
+              <th>Tendencia</th>
+              <th>Coins</th>
+              <th>Precio Compra</th>
+              <th>Precio Actual</th>
+              <th>Valor USD</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="portfolio-list">
+            <!-- Injected by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL SIGNUP ── -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-card">
+      <button class="modal-close" id="modal-close">✕</button>
+      <div class="modal-icon">◈</div>
+      <h3 class="modal-title">Únete a TrendMint</h3>
+      <p class="modal-sub">Empieza a monetizar el futuro hoy mismo.</p>
+      <form class="modal-form" id="modal-form">
+        <input type="text" placeholder="Tu nombre completo" class="form-input" id="form-name" required />
+        <input type="email" placeholder="Tu correo electrónico" class="form-input" id="form-email" required />
+        <input type="password" placeholder="Contraseña segura" class="form-input" id="form-pass" required />
+        <button type="submit" class="btn-hero w-full">Crear Cuenta Gratis →</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── TOAST NOTIFICATION ── -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
