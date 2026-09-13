@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply bg-cosmos-950 text-slate-100 font-sans antialiased selection:bg-astral-violet selection:text-white min-h-screen;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.12) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(234, 179, 8, 0.08) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
+  }
+
+  #root {
+    width: 100%;
+    max-width: 100vw;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Prevent iOS zoom-in and hide spinner arrows */
+  input[type="number"]::-webkit-inner-spin-button, 
+  input[type="number"]::-webkit-outer-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0; 
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Glassmorphism custom classes */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-gold {
+  background: rgba(26, 21, 12, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(234, 179, 8, 0.25);
+}
+
+.glass-panel-violet {
+  background: rgba(24, 15, 38, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+/* 3D Glowing Lottery Ball */
+.ball-glow-cyan {
+  background: radial-gradient(circle at 30% 30%, #67e8f9, #0891b2 50%, #0e7490 90%);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+}
+
+.ball-glow-gold {
+  background: radial-gradient(circle at 30% 30%, #fef08a, #eab308 50%, #a16207 90%);
+  box-shadow: 0 4px 18px rgba(234, 179, 8, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.7);
+}
+
+.ball-glow-violet {
+  background: radial-gradient(circle at 30% 30%, #d8b4fe, #9333ea 50%, #6b21a8 90%);
+  box-shadow: 0 4px 18px rgba(168, 85, 247, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.7);
+}
+
+.ball-glow-emerald {
+  background: radial-gradient(circle at 30% 30%, #a7f3d0, #059669 50%, #064e3b 90%);
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.7);
+}
+
+.ball-glow-red {
+  background: radial-gradient(circle at 30% 30%, #fecaca, #dc2626 50%, #991b1b 90%);
+  box-shadow: 0 4px 18px rgba(239, 68, 68, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.7);
+}
+
+/* Custom terminal scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(11, 15, 25, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.5);
+}
