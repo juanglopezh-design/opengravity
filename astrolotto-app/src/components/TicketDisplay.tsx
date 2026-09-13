@@ -19,7 +19,7 @@ export const TicketDisplay: React.FC<TicketDisplayProps> = ({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedRationale, setExpandedRationale] = useState<Record<string, boolean>>({});
 
-  const handleCopy = (ticket: PredictedTicket) => {
+  const handleCopy = async (ticket: PredictedTicket) => {
     let text = '';
     if (config.id === 'medellin') {
       text = `Lotería de Medellín: Número [${ticket.mainNumbers.join('')}] - Serie [${ticket.extraNumbers[0]?.toString().padStart(3, '0')}]`;
@@ -29,7 +29,11 @@ export const TicketDisplay: React.FC<TicketDisplayProps> = ({
       text = `${config.name}: [${ticket.mainNumbers.join(', ')}] + ${config.extraLabel}: [${ticket.extraNumbers.join(', ')}] (Confianza: ${ticket.confidence}%)`;
     }
 
-    navigator.clipboard.writeText(text);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Android WebView can block Clipboard API — silently ignore
+    }
     setCopiedId(ticket.id);
     setTimeout(() => setCopiedId(null), 2000);
   };
