@@ -1,0 +1,19 @@
+{
+  "short_name": "AstroLotto",
+  "name": "AstroLotto AI — Oráculo Cuántico",
+  "description": "Predicciones astrológicas, numerológicas y comprobador de loterías oficiales en tiempo real.",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./",
+  "background_color": "#0a0d14",
+  "theme_color": "#d4af37",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "es-ES"
+}
