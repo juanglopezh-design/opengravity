@@ -21,6 +21,7 @@ import type {
 import { calculateLotteryStats, runPredictionEngine } from './services/predictionEngine';
 import { computeAstroInfluence } from './services/astrologyEngine';
 import { computeNumerologyBreakdown } from './services/numerologyEngine';
+import { triggerHaptic, triggerSuccessHaptic } from './services/nativeBridge';
 import { SlidersHorizontal, Layers, Cpu, Zap } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -67,6 +68,7 @@ export const App: React.FC = () => {
 
   // Handle generation
   const handleGenerate = useCallback(async () => {
+    triggerHaptic();
     setIsGenerating(true);
     setLogs([]); // fresh logs
 
@@ -81,6 +83,7 @@ export const App: React.FC = () => {
       );
       setTickets(result.tickets);
       setStats(result.stats);
+      triggerSuccessHaptic();
     } catch (err) {
       console.error('Error generating predictions:', err);
     } finally {
